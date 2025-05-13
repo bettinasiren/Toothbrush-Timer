@@ -14,7 +14,8 @@ const app = express();
 
 app.use(express.json());
 
-app.post("/", async (request, response) => {
+// skapa user
+app.post("/user", async (request, response) => {
   const { username, password, email } = request.body;
   console.log(request.body);
 
@@ -26,10 +27,34 @@ app.post("/", async (request, response) => {
   response.status(200).send(rows);
 });
 
-app.get("/", async (_request, response) => {
+// hämta user (baserat på id)?
+app.get("/user", async (_request, response) => {
   const users = await client.query("SELECT * FROM users ");
   response.send(users);
 });
+
+// hämta alla avatarer
+app.get("/avatars", async (_request, response) => {
+  const avatars = await client.query("SELECT * FROM avatars");
+
+  response.send(avatars);
+});
+
+//hämta medaljer med villkor som uppfylls
+app.get("/medals", async (_request, response) => {
+  const medals = await client.query("SELECT * FROM medals")
+  const userMedals = await client.query("SELECT * from user_medals")
+
+})
+
+//uppdatera antal ggr som användaren har borstat tänderna
+
+//uppdatera medalj till användaren
+app.put("/medals", async(_request, response) => {
+
+
+})
+
 
 const StartServer = () => {
   client.connect();

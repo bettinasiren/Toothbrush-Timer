@@ -32,3 +32,9 @@ CREATE TABLE user_medals(
   CONSTRAINT fk_users FOREIGN KEY (user_id) REFERENCES users (id),
   CONSTRAINT fk_medals FOREIGN KEY (medal_id) REFERENCES medals (id)
 )
+
+INSERT INTO avatars (avatar) VALUES (''),(''),(''),(''),('')
+
+INSERT INTO medals (name, image, criteria) VALUES (''),(''),(''),('')
+
+INSERT INTO user_medals(user_id, medal_id) VALUES (''),(''),

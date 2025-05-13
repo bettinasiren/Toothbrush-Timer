@@ -22,15 +22,31 @@ const client = new pg_1.Client({
 const port = 3000;
 const app = (0, express_1.default)();
 app.use(express_1.default.json());
-app.post("/", (request, response) => __awaiter(void 0, void 0, void 0, function* () {
+// skapa user
+app.post("/user", (request, response) => __awaiter(void 0, void 0, void 0, function* () {
     const { username, password, email } = request.body;
     console.log(request.body);
     const { rows } = yield client.query("INSERT INTO users (username, password, email) VALUES ($1, $2, $3)", [username, password, email]);
     response.status(200).send(rows);
 }));
-app.get("/", (_request, response) => __awaiter(void 0, void 0, void 0, function* () {
+// hämta user (baserat på id)?
+app.get("/user", (_request, response) => __awaiter(void 0, void 0, void 0, function* () {
     const users = yield client.query("SELECT * FROM users ");
     response.send(users);
+}));
+// hämta alla avatarer
+app.get("/avatars", (_request, response) => __awaiter(void 0, void 0, void 0, function* () {
+    const avatars = yield client.query("SELECT * FROM avatars");
+    response.send(avatars);
+}));
+//hämta medaljer med villkor som uppfylls
+app.get("/medals", (_request, response) => __awaiter(void 0, void 0, void 0, function* () {
+    const medals = yield client.query("SELECT * FROM medals");
+    const userMedals = yield client.query("SELECT * from user_medals");
+}));
+//uppdatera antal ggr som användaren har borstat tänderna
+//uppdatera medalj till användaren
+app.put("/medals", (_request, response) => __awaiter(void 0, void 0, void 0, function* () {
 }));
 const StartServer = () => {
     client.connect();
