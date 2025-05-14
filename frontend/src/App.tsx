@@ -2,12 +2,15 @@ import { useState } from 'react'
 import reactLogo from './assets/react.svg'
 import viteLogo from '/vite.svg'
 import './App.css'
+import { RouterProvider } from 'react-router-dom'
+import routes from './routes'
 
 function App() {
   const [count, setCount] = useState(0)
 
   return (
     <>
+     <RouterProvider router={routes} />
       <div>
         <h1>Hej!</h1>
         <a href="https://vite.dev" target="_blank">
