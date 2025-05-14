@@ -20,9 +20,11 @@ CREATE TABLE users (
 
 CREATE TABLE medals (
   id SERIAL PRIMARY KEY,
-  name TEXT NOT NULL,
-  image TEXT NOT NULL,
-  criteria TEXT NOT NULL
+  medal_name TEXT NOT NULL,
+  medal_image TEXT NOT NULL,
+  criteria TEXT NOT NULL,
+  user_id INT,
+  CONSTRAINT fk_users FOREIGN KEY(user_id) REFERENCES users(id)
 );
 
 CREATE TABLE user_medals(
@@ -31,10 +33,10 @@ CREATE TABLE user_medals(
   medal_id INT,
   CONSTRAINT fk_users FOREIGN KEY (user_id) REFERENCES users (id),
   CONSTRAINT fk_medals FOREIGN KEY (medal_id) REFERENCES medals (id)
-)
+);
 
-INSERT INTO avatars (avatar) VALUES (''),(''),(''),(''),('')
+INSERT INTO avatars (avatar) VALUES ('https://img.icons8.com/arcade/64/baby-yoda.png'),('https://img.icons8.com/arcade/64/darth-vader.png'),('https://img.icons8.com/arcade/64/lightsaber.png'),('https://img.icons8.com/arcade/64/r2-d2.png'),('https://img.icons8.com/arcade/64/stormtrooper.png');
 
-INSERT INTO medals (name, image, criteria) VALUES (''),(''),(''),('')
+INSERT INTO medals (medal_name, medal_image, criteria) VALUES ('first medal', 'https://img.icons8.com/arcade/64/prize.png','Brush teeth 5 times'),('second medal', 'https://img.icons8.com/arcade/64/prize.png', 'Brush teeth 10 times'),('third medal', 'https://img.icons8.com/arcade/64/prize.png', 'Brush teeth 15 times'),('forth medal', 'https://img.icons8.com/arcade/64/prize.png', 'Brush teeth 20 times');
 
-INSERT INTO user_medals(user_id, medal_id) VALUES (''),(''),
+INSERT INTO user_medals(user_id, medal_id) VALUES (''),('');
