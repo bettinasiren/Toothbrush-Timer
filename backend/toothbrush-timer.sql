@@ -2,6 +2,7 @@ DROP TABLE IF EXISTS avatars CASCADE;
 DROP TABLE IF EXISTS user_medals CASCADE;
 DROP TABLE IF EXISTS users CASCADE;
 DROP TABLE IF EXISTS medals CASCADE;
+DROP TABLE IF EXISTS brushing_tracker CASCADE;
 
 CREATE TABLE avatars (
   id SERIAL PRIMARY KEY,
@@ -33,6 +34,12 @@ CREATE TABLE user_medals(
   medal_id INT,
   CONSTRAINT fk_users FOREIGN KEY (user_id) REFERENCES users (id),
   CONSTRAINT fk_medals FOREIGN KEY (medal_id) REFERENCES medals (id)
+);
+CREATE TABLE brushing_tracker(
+  id SERIAL PRIMARY KEY,
+  user_id INT,
+  brushing_session TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  CONSTRAINT fk_users FOREIGN KEY (user_id) REFERENCES users(id)
 );
 
 INSERT INTO avatars (avatar) VALUES ('https://img.icons8.com/arcade/64/baby-yoda.png'),('https://img.icons8.com/arcade/64/darth-vader.png'),('https://img.icons8.com/arcade/64/lightsaber.png'),('https://img.icons8.com/arcade/64/r2-d2.png'),('https://img.icons8.com/arcade/64/stormtrooper.png');

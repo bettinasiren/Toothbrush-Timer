@@ -1,5 +1,5 @@
 import cors from "cors";
-import express, {Request, Response} from "express";
+import express from "express";
 import dotenv from "dotenv";
 import { Client } from "pg";
 
@@ -24,9 +24,10 @@ interface AvatarType {
 }
 
 interface MedalType {
-  name: string;
-  image: string;
+  medal_name: string;
+  medal_image: string;
   criteria: string;
+  user_id: number;
 }
 app.use(cors());
 app.use(express.json());
@@ -45,6 +46,15 @@ app.post("/user", async (request, response) => {
   );
 
   response.status(201).send(user);
+});
+//hämta alla användare
+app.get("/user", async (request, response) => {
+  const { rows: users } = await client.query("SELECT * FROM users");
+  // const user = await client.query(
+  //   "SELECT * FROM users INNER JOIN avatars ON users.avatar_id = avatar.id WHERE users.id = $1",
+  //   [id]
+  // );
+  response.send(users);
 });
 
 // hämta user (baserat på id)
@@ -87,6 +97,41 @@ app.post("/user/avatar", async (request, response) => {
 //     Spel, borsta tänderna, får medalj
 //---------------------------------------------------
 
+// lägg till ett värde för varje gång man har borstat tänderna
+app.post("/brushing", async (request, response) => {
+  const userId = request.body.user_id;
+
+  const { rows: brushingSession } = await client.query(
+    "INSERT INTO brushing_tracker (user_id) VALUES ($1)",
+    [userId]
+  );
+
+  response.send(brushingSession);
+});
+
+//hämta alla tandborsts-sessioner per användare och delar med 5 för att få fram hur många medaljer användaren ska ha
+app.get("/brushing", async (request, response) => {
+  const userId: number = request.body.user_id;
+  const { rows: brushingSession } = await client.query(
+    "SELECT * FROM brushing_tracker WHERE user_id=$1",
+    [userId]
+  );
+
+  const earnedMedal = Math.floor(brushingSession.length / 5);
+
+  const newMedal = await client.query(
+    "INSERT INTO user_medals (user_id, medal_id) VALUES ($1, $2)",
+    [userId, earnedMedal]
+  );
+
+  console.log(brushingSession.length);
+
+  console.log(earnedMedal);
+  console.log(newMedal);
+
+  response.send(newMedal);
+});
+
 //hämta medaljer
 app.get("/medals", async (_request, response) => {
   const { rows: medals } = await client.query("SELECT * FROM medals");
@@ -95,11 +140,13 @@ app.get("/medals", async (_request, response) => {
 
 //tilldela ny medalj till användaren
 app.post("/medals/", async (request, response) => {
-  const { userId, medalId } = request.query as {userId: string; medalId: string
+  const { userId, medalId } = request.query as {
+    userId: string;
+    medalId: string;
   };
 
   // kolla om medaljen redan är tilldelad till användaren
-  // const { rows: userMedals } = await client.query("SELECT * FROM user_medals WHERE user_id = $1 AND medal_id = ( $2,)", [userId, medalId]);
+  // const { rows: userMedals } = await client.query("SELECT * FROM user_medals WHERE user_id = $1 AND medal_id = $2,", [userId, medalId]);
 
   // if(userMedals.length === 0){
   //    return response.send("du har redan denna medalj")

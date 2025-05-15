@@ -1,6 +1,11 @@
-function BrushingTimer(){
-  return(
-    <></>
-  )
+import ProgressBar from "./ProgressBar";
+
+function BrushingTimer() {
+  return (
+    <>
+      Brushing Timer
+      <ProgressBar></ProgressBar>
+    </>
+  );
 }
-export default BrushingTimer
+export default BrushingTimer;

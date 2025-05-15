@@ -33,6 +33,15 @@ app.post("/user", (request, response) => __awaiter(void 0, void 0, void 0, funct
     const { rows: user } = yield client.query("INSERT INTO users (username, password, email) VALUES ($1, $2, $3)", [username, password, email]);
     response.status(201).send(user);
 }));
+//hämta alla användare
+app.get("/user", (request, response) => __awaiter(void 0, void 0, void 0, function* () {
+    const { rows: users } = yield client.query("SELECT * FROM users");
+    // const user = await client.query(
+    //   "SELECT * FROM users INNER JOIN avatars ON users.avatar_id = avatar.id WHERE users.id = $1",
+    //   [id]
+    // );
+    response.send(users);
+}));
 // hämta user (baserat på id)
 app.get("/user/:id", (request, response) => __awaiter(void 0, void 0, void 0, function* () {
     const id = request.params.id;
@@ -61,6 +70,23 @@ app.post("/user/avatar", (request, response) => __awaiter(void 0, void 0, void 0
 //---------------------------------------------------
 //     Spel, borsta tänderna, får medalj
 //---------------------------------------------------
+// lägg till ett värde för varje gång man har borstat tänderna
+app.post("/brushing", (request, response) => __awaiter(void 0, void 0, void 0, function* () {
+    const userId = request.body.user_id;
+    const { rows: brushingSession } = yield client.query("INSERT INTO brushing_tracker (user_id) VALUES ($1)", [userId]);
+    response.send(brushingSession);
+}));
+//hämta alla tandborsts-sessioner per användare och delar med 5 för att få fram hur många medaljer användaren ska ha
+app.get("/brushing", (request, response) => __awaiter(void 0, void 0, void 0, function* () {
+    const userId = request.body.user_id;
+    const { rows: brushingSession } = yield client.query("SELECT * FROM brushing_tracker WHERE user_id=$1", [userId]);
+    const earnedMedal = Math.floor(brushingSession.length / 5);
+    const newMedal = yield client.query("INSERT INTO user_medals (user_id, medal_id) VALUES ($1, $2)", [userId, earnedMedal]);
+    console.log(brushingSession.length);
+    console.log(earnedMedal);
+    console.log(newMedal);
+    response.send(newMedal);
+}));
 //hämta medaljer
 app.get("/medals", (_request, response) => __awaiter(void 0, void 0, void 0, function* () {
     const { rows: medals } = yield client.query("SELECT * FROM medals");
@@ -70,7 +96,7 @@ app.get("/medals", (_request, response) => __awaiter(void 0, void 0, void 0, fun
 app.post("/medals/", (request, response) => __awaiter(void 0, void 0, void 0, function* () {
     const { userId, medalId } = request.query;
     // kolla om medaljen redan är tilldelad till användaren
-    // const { rows: userMedals } = await client.query("SELECT * FROM user_medals WHERE user_id = $1 AND medal_id = ( $2,)", [userId, medalId]);
+    // const { rows: userMedals } = await client.query("SELECT * FROM user_medals WHERE user_id = $1 AND medal_id = $2,", [userId, medalId]);
     // if(userMedals.length === 0){
     //    return response.send("du har redan denna medalj")
     // }

@@ -1,6 +1,11 @@
-function BrushingPage(){
-  return(
-    <>BrushingPage</>
-  )
+import BrushingTimer from "../components/BrushingTimer";
+
+function BrushingPage() {
+  return (
+    <>
+      BrushingPage
+      <BrushingTimer></BrushingTimer>
+    </>
+  );
 }
-export default BrushingPage
+export default BrushingPage;
