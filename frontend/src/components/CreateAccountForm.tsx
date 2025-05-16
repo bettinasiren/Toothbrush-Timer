@@ -1,4 +1,21 @@
+import { useState } from "react";
+
+interface UserType {
+  username: string;
+  password: string;
+  email: string;
+  avatar_id: number;
+}
 function CreateAccountForm() {
+  const[account, setAccount] = useState<UserType[]>([])
+  const [userName, setUserName] = useState("");
+  const [email, setEmail] = useState("")
+  const[password, setPassword] = useState("")
+
+  async function createAccount(){
+
+  }
+
   function handleSubmit() {}
 
   return (

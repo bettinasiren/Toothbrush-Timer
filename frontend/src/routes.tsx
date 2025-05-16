@@ -12,8 +12,8 @@ const routes = createBrowserRouter([
     element: <Layout />,
     children: [
       { element: <Start />, path: "/" },
-      { element: <Home />, path: "/home" },
-      { element: <CreateAccount />, path: "/create-account" },
+      { element: <Home />, path: "/home/" },
+      { element: <CreateAccount />, path: "/create-account/" },
       { element: <BrushingPage />, path: "/brushing-page" },
     ],
   },

@@ -1,55 +1,59 @@
 import { useEffect, useState } from "react";
 import ProgressBar from "./ProgressBar";
-
+ import confetti from 'canvas-confetti';
 
 
 function BrushingTimer() {
   const [timer, _setTimer] = useState(2);
-  const [_isActive, setIsActive] = useState(false)
+  const [isActive, setIsActive] = useState(false);
   const [timeLeft, setTimeLeft] = useState(0);
   const [_progressDone, setProgressDone] = useState(false);
-  // const [_progress, setProgress] = useState(100); //100 %
+  const [progress, setProgress] = useState(0); //börjar på 0 %
 
   // let timeInMilliseconds = timer * 60 * 1000;
   let timeInSeconds = timer * 60;
   let seconds = timeInSeconds - timer * 60;
 
   useEffect(() => {
-    let brushingtimer : number;
-    if(timeLeft > 0){
-      brushingtimer = setTimeout(() => {
-        setTimeLeft((prevTime) => prevTime - 1)
-      },1000)
-
-    } else if(timeLeft === 0){
-      setIsActive(false)
-      setProgressDone(true)
+    let brushingTimer: number;
+    if (isActive && timeLeft > 0) {
+      brushingTimer = setTimeout(() => {
+        setTimeLeft((prevTime) => prevTime - 1); //kollar på tiden i procent och minskar med en.
+        setProgress((prev) => {
+          const newProgress = prev + ( 100 / (timer * 60 ));
+          return newProgress < 0 ? 0 : newProgress
+        }) //gör en ny progress baserat på tidigare tid(prevTime är värdet av tiden i procent och representerar hur många procent som är kvar i progressbaren) + timer(som börjar på två minuter * 60 (konverterar detta till sekunder (vill konvertera till millisecunder)))
+      }, 1000);
+    } else if (timeLeft === 0) {
+      setIsActive(false);
+      setProgressDone(true);
     }
- return () => clearTimeout(brushingtimer)
-  },[timeLeft]);
+    return () => clearTimeout(brushingTimer);
+  }, [timeLeft, isActive]);
 
-  let minutes = Math.floor(timeLeft / 60)
-  seconds = timeLeft - minutes * 60
+  let minutes = Math.floor(timeLeft / 60);
+  seconds = timeLeft - minutes * 60;
 
-  if(seconds < 10){
-    seconds = 0 + seconds
+  if (seconds < 10) {
+    seconds = 0 + seconds;
   }
-function handleButtonClick(){
-setIsActive(true)
-setTimeLeft(timeInSeconds)
-setProgressDone(false)
-}
-
+  function handleButtonClick() {
+    setIsActive(true);
+    setTimeLeft(timeInSeconds);
+    setProgressDone(false);
+    confetti
+  }
 
   return (
     <>
-      Brushing Timer
+      isActive Brushing Timer
       <div>
-      <button onClick={handleButtonClick }>Start brushing-timer</button>
-      {minutes} : {seconds}
+        <button onClick={handleButtonClick}>Start brushing-timer</button>
+        {minutes} : {seconds}
       </div>
-
-      <ProgressBar></ProgressBar>
+      <ProgressBar
+        progress={progress}
+      ></ProgressBar>
     </>
   );
 }
