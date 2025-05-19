@@ -29,6 +29,11 @@ interface MedalType {
   criteria: string;
   user_id: number;
 }
+
+interface BrushingSessionType {
+  user_id: number;
+}
+
 app.use(cors());
 app.use(express.json());
 

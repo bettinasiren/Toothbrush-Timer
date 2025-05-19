@@ -1,6 +1,13 @@
+import { useState } from "react";
 import { Link } from "react-router-dom";
+import {useAuth} from "../context/UserContext"
 
 function LoginForm() {
+  const {setUserId, setIsLoggedIn} = useAuth()
+  const [username, setUsername] = useState('')
+  const [password, setPassword] = useState('')
+
+
   function handleSubmit() {}
   return (
     <>
