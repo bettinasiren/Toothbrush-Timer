@@ -3,20 +3,19 @@ import ProgressBar from "./ProgressBar";
 import confetti from "canvas-confetti";
 import { Link } from "react-router-dom";
 
-
 interface BrushingSessionType {
   user_id: number;
 }
 
 function BrushingTimer(props: BrushingSessionType) {
-  const [_brushingSession, _setBrushingSession] = useState<BrushingSessionType[]>([])
-  const [timer, _setTimer] = useState(2);
+  const [_brushingSession, _setBrushingSession] = useState<
+    BrushingSessionType[]
+  >([]);
+  const [timer, _setTimer] = useState(0.1);
   const [isActive, setIsActive] = useState(false);
   const [timeLeft, setTimeLeft] = useState(0.1);
   const [progressDone, setProgressDone] = useState(false);
   const [progress, setProgress] = useState(0); //börjar på 0 %
-
-
 
   // let timeInMilliseconds = timer * 60 * 1000;
   let timeInSeconds = timer * 60;
@@ -37,6 +36,7 @@ function BrushingTimer(props: BrushingSessionType) {
       setIsActive(false);
       setProgressDone(true);
       confetti();
+      setProgress(0);
     }
 
     return () => clearTimeout(brushingTimer);
@@ -55,46 +55,20 @@ function BrushingTimer(props: BrushingSessionType) {
     setProgressDone(false);
   }
 
-  async function handleBrushingSession(){
-   await fetch(`http://localhost:3000/brushing/`, {
-    method: "PUT",
-    body: JSON.stringify({
-      user_id: 1
-    }),
-    headers: {
-      Accept: "application/json",
-      "Content-Type": "application/json",
-    },
-   })
-   .then((res) => res.json())
-   .then((json) => console.log(json));
-
-
+  async function handleBrushingSession() {
+    await fetch(`http://localhost:3000/brushing/`, {
+      method: "PUT",
+      body: JSON.stringify({
+        user_id: 1,
+      }),
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      },
+    })
+      .then((res) => res.json())
+      .then((json) => console.log(json));
   }
-
-  //  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
-  //   event.preventDefault();
-
-  //   await fetch(`http://localhost:3001/product/${id}`, {
-  //     method: "PUT",
-  //     body: JSON.stringify({
-  //       name,
-  //       price,
-  //       imageUrl,
-  //       availability,
-  //       description,
-  //     }),
-  //     headers: {
-  //       Accept: "application/json",
-  //       "Content-Type": "application/json",
-  //     },
-  //   })
-  //     .then((response) => response.json())
-  //     .then((json) => console.log(json));
-
-  //   navigate("/admin");
-  // }
-
 
   return (
     <>
@@ -115,7 +89,7 @@ function BrushingTimer(props: BrushingSessionType) {
           <div> Du klarade det!</div>
           <button onClick={handleBrushingSession}>
             {" "}
-           <Link to={"/home"}> Gå till main</Link>
+            <Link to={"/home"}> Gå till main</Link>
           </button>
         </>
       )}

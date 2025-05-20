@@ -4,7 +4,7 @@
   "main": "index.js",
   "scripts": {
     "build": "npx tsc",
-    "dev": "concurrently \"nodemon index.ts\" \"npx tsc --watch\"",
+    "dev": "concurrently \"nodemon index.js\" \"npx tsc --watch\"",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
@@ -12,12 +12,15 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "cookie-parser": "^1.4.7",
     "dotenv": "^16.5.0",
     "express": "^5.1.0",
     "pg": "^8.16.0",
-    "postgres": "^3.4.5"
+    "postgres": "^3.4.5",
+    "uuid": "^11.1.0"
   },
   "devDependencies": {
+    "@types/cookie-parser": "^1.4.8",
     "@types/cors": "^2.8.18",
     "@types/express": "^5.0.1",
     "@types/node": "^22.15.17",

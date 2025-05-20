@@ -41,6 +41,11 @@ CREATE TABLE brushing_tracker(
   brushing_session TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   CONSTRAINT fk_users FOREIGN KEY (user_id) REFERENCES users(id)
 );
+CREATE TABLE tokens(
+  user_id INT,
+  token TEXT UNIQUE NOT NULL,
+  CONSTRAINT fk_users FOREIGN KEY (user_id) REFERENCES users(id)
+);
 
 INSERT INTO avatars (avatar) VALUES ('https://img.icons8.com/arcade/64/baby-yoda.png'),('https://img.icons8.com/arcade/64/darth-vader.png'),('https://img.icons8.com/arcade/64/lightsaber.png'),('https://img.icons8.com/arcade/64/r2-d2.png'),('https://img.icons8.com/arcade/64/stormtrooper.png');
 

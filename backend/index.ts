@@ -1,7 +1,11 @@
 import cors from "cors";
-import express from "express";
+import express, { Request, Response, NextFunction } from "express";
+// import * as express from 'express';
 import dotenv from "dotenv";
 import { Client } from "pg";
+import { v4 as uuidv4 } from "uuid";
+import cookieParser from "cookie-parser";
+console.log("testets")
 
 const port = 3000;
 const app = express();
@@ -11,6 +15,36 @@ dotenv.config();
 const client = new Client({
   connectionString: process.env.PGURI,
 });
+
+interface MyRequest extends Request {
+  user?: {
+    user_id : number
+  }
+}
+
+// declare global {
+//   namespace express {
+//     export interface Request {
+//       user: {
+//         user_id: number;
+//       };
+//     }
+//   }
+// }
+
+// interface Request  {
+//   headers: any;
+//   body: any;
+//   query: any;
+//   cookies: any;
+//   user?: {
+//     user_id: number;
+//   };
+// }
+
+// interface Response{
+
+// }
 
 interface UserType {
   username: string;
@@ -34,8 +68,49 @@ interface BrushingSessionType {
   user_id: number;
 }
 
+interface TokenType {
+  token: string;
+}
+
 app.use(cors());
 app.use(express.json());
+app.use(cookieParser());
+
+//egen middleware för authentification
+
+async function authenticate(
+  request: MyRequest,
+  response: Response,
+  next: NextFunction
+) {
+  const token: string =
+    (request.query && request.query.token) ||
+    (request.body && request.body.token) ||
+    (request.headers && request.headers["authorization"]) ||
+    (request.cookies && request.cookies.token);
+  // console.log(token);
+
+  console.log("kakor: ", request.cookies);
+
+  console.log("HEJ!!!!");
+
+  if (!token) {
+    return response.status(401).send("finns ingen token");
+  }
+  //  console.log("token:", token)
+  const validToken = await client.query("SELECT * FROM tokens WHERE token=$1", [
+    token,
+  ]);
+
+  console.log("valid token:", validToken);
+  if (validToken.rows.length === 0 || validToken.rows[0].token !== token) {
+    return response.status(401).send("inte ett giltigt tokenvärde");
+  }
+
+  request.user = { user_id: validToken.rows[0].user_id };
+  console.log(request.user);
+  next();
+}
 
 // app.use("/",userRoutes)
 
@@ -53,7 +128,7 @@ app.post("/user", async (request, response) => {
   response.status(201).send(user);
 });
 //hämta alla användare
-app.get("/user", async (request, response) => {
+app.get("/user", async (_request, response) => {
   const { rows: users } = await client.query("SELECT * FROM users");
   // const user = await client.query(
   //   "SELECT * FROM users INNER JOIN avatars ON users.avatar_id = avatar.id WHERE users.id = $1",
@@ -74,6 +149,75 @@ app.get("/user/:id", async (request, response) => {
   // );
   response.send(user);
 });
+//login
+app.post("/login", async (request, response) => {
+  const { email, password }: UserType = request.body;
+  // console.log(request.body);
+
+  try {
+    const existingUser = await client.query(
+      "SELECT * FROM users WHERE email=$1 AND password=$2",
+      [email, password]
+    );
+
+    // if (existingUser.rows.length === 0) {
+    //   return response.status(401).send("Epost eller lösenord finns ej");
+    // }
+    const user_id = existingUser.rows[0].id;
+    const token = uuidv4();
+
+    await client.query("INSERT INTO tokens (user_id, token) VALUES($1, $2)", [
+      user_id,
+      token,
+    ]);
+
+    response.setHeader("Set-Cookie", `token=${token}; Path= /`);
+    // console.log(request.cookies.token)
+    response.status(201).send(request.cookies.token);
+  } catch (error) {
+    response.status(500).send("ett fel har inträffat vid inloggningen");
+  }
+
+  // }
+  // const existingUser = await client.query(
+  //   "SELECT * FROM users WHERE email=$1 AND password=$2",
+  //   [email, password]
+  // );
+
+  // if (existingUser.rows.length === 0) {
+  //   return response.status(401).send("Epost eller lösenord finns ej");
+  // }
+
+  // const user_id = existingUser.rows[0].id;
+  // const token = uuidv4();
+
+  // await client.query("INSERT INTO tokens (user_id, token) VALUES($1, $2)", [
+  //   user_id,
+  //   token,
+  // ]);
+
+  // response.setHeader("Set-Cookie", `token=${token}; Path= /`);
+
+  // response.status(201).send(request.cookies.token);
+});
+
+// logout
+app.post(
+  "/logout",
+  authenticate,
+  async (request: MyRequest, response: Response) => {
+    //  console.log(request.user)
+    const user_id = request.user?.user_id;
+    // if (!user_id) {
+    //   return response.status(401).send("du är inte inloggad");
+    // }
+    const logOut = await client.query("DELETE FROM tokens WHERE user_id=$1", [
+      user_id,
+    ]);
+    response.clearCookie("token");
+    response.status(200).send(logOut);
+  }
+);
 
 // hämta alla avatarer
 app.get("/avatars", async (_request, response) => {
@@ -85,8 +229,6 @@ app.get("/avatars", async (_request, response) => {
 //Välj avatar till din användare genom att uppdatera users-tabellen
 app.post("/user/avatar", async (request, response) => {
   const { userId, avatarId } = request.query;
-
-  //validering
 
   const myAvatar = await client.query(
     "UPDATE users SET avatar_id = $1 WHERE id = $2",
@@ -177,8 +319,8 @@ app.get("/medals/:userId", async (request, response) => {
   response.send(medals);
 });
 
-const StartServer = () => {
-  client.connect();
+const StartServer = async () => {
+  await client.connect();
   app.listen(port, () => {
     console.log(`Redo på Port http://localhost:${port}/`);
   });
