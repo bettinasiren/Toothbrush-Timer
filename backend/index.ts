@@ -5,7 +5,6 @@ import dotenv from "dotenv";
 import { Client } from "pg";
 import { v4 as uuidv4 } from "uuid";
 import cookieParser from "cookie-parser";
-console.log("testets")
 
 const port = 3000;
 const app = express();
@@ -90,12 +89,8 @@ async function authenticate(
     (request.cookies && request.cookies.token);
   // console.log(token);
 
-  console.log("kakor: ", request.cookies);
-
-  console.log("HEJ!!!!");
-
   if (!token) {
-    return response.status(401).send("finns ingen token");
+    response.status(401).send("finns ingen token");
   }
   //  console.log("token:", token)
   const validToken = await client.query("SELECT * FROM tokens WHERE token=$1", [
@@ -104,7 +99,7 @@ async function authenticate(
 
   console.log("valid token:", validToken);
   if (validToken.rows.length === 0 || validToken.rows[0].token !== token) {
-    return response.status(401).send("inte ett giltigt tokenvärde");
+    response.status(401).send("inte ett giltigt tokenvärde");
   }
 
   request.user = { user_id: validToken.rows[0].user_id };
@@ -211,11 +206,11 @@ app.post(
     // if (!user_id) {
     //   return response.status(401).send("du är inte inloggad");
     // }
-    const logOut = await client.query("DELETE FROM tokens WHERE user_id=$1", [
+    await client.query("DELETE FROM tokens WHERE user_id=$1", [
       user_id,
     ]);
     response.clearCookie("token");
-    response.status(200).send(logOut);
+    response.status(200).send();
   }
 );
 

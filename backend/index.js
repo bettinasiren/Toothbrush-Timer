@@ -19,7 +19,6 @@ const dotenv_1 = __importDefault(require("dotenv"));
 const pg_1 = require("pg");
 const uuid_1 = require("uuid");
 const cookie_parser_1 = __importDefault(require("cookie-parser"));
-console.log("testets");
 const port = 3000;
 const app = (0, express_1.default)();
 dotenv_1.default.config();
@@ -37,10 +36,8 @@ function authenticate(request, response, next) {
             (request.headers && request.headers["authorization"]) ||
             (request.cookies && request.cookies.token);
         // console.log(token);
-        console.log("kakor: ", request.cookies);
-        console.log("HEJ!!!!");
         if (!token) {
-            return response.status(401).send("finns ingen token");
+            response.status(401).send("finns ingen token");
         }
         //  console.log("token:", token)
         const validToken = yield client.query("SELECT * FROM tokens WHERE token=$1", [
@@ -48,7 +45,7 @@ function authenticate(request, response, next) {
         ]);
         console.log("valid token:", validToken);
         if (validToken.rows.length === 0 || validToken.rows[0].token !== token) {
-            return response.status(401).send("inte ett giltigt tokenvärde");
+            response.status(401).send("inte ett giltigt tokenvärde");
         }
         request.user = { user_id: validToken.rows[0].user_id };
         console.log(request.user);
@@ -132,11 +129,11 @@ app.post("/logout", authenticate, (request, response) => __awaiter(void 0, void 
     // if (!user_id) {
     //   return response.status(401).send("du är inte inloggad");
     // }
-    const logOut = yield client.query("DELETE FROM tokens WHERE user_id=$1", [
+    yield client.query("DELETE FROM tokens WHERE user_id=$1", [
         user_id,
     ]);
     response.clearCookie("token");
-    response.status(200).send(logOut);
+    response.status(200).send();
 }));
 // hämta alla avatarer
 app.get("/avatars", (_request, response) => __awaiter(void 0, void 0, void 0, function* () {
