@@ -1,10 +1,10 @@
 import { Link } from "react-router-dom";
-import ShowUser from "./ShowUser";
+// import ShowUser from "./ShowUser";
 
 function UserCreatedMessage() {
   return (
     <>
-      <ShowUser></ShowUser>
+      {/* <ShowUser></ShowUser> */}
       <button>
         {" "}
         <Link to={"/home"}> Gå till Home-sidan</Link>

@@ -25,7 +25,10 @@ dotenv_1.default.config();
 const client = new pg_1.Client({
     connectionString: process.env.PGURI,
 });
-app.use((0, cors_1.default)());
+app.use((0, cors_1.default)({
+    origin: 'http://localhost:5173',
+    credentials: true
+}));
 app.use(express_1.default.json());
 app.use((0, cookie_parser_1.default)());
 //egen middleware för authentification
@@ -56,10 +59,28 @@ function authenticate(request, response, next) {
 //--------------------Skapa och Visa---------------------
 // skapa user
 app.post("/user", (request, response) => __awaiter(void 0, void 0, void 0, function* () {
-    const { username, password, email } = request.body;
+    const { username, password, email, selectedAvatar } = request.body;
     console.log(request.body);
-    const { rows: user } = yield client.query("INSERT INTO users (username, password, email) VALUES ($1, $2, $3)", [username, password, email]);
-    response.status(201).send(user);
+    try {
+        const { rows: avatars } = yield client.query("SELECT * FROM avatars WHERE =$1", [selectedAvatar]);
+        if (avatars.length === 0) {
+            response.status(400).send("No avatar exists");
+        }
+        const { rows: user } = yield client.query("INSERT INTO users (username, password, email, avatar_id) VALUES ($1, $2, $3, $4) RETURNING *", [username, password, email, selectedAvatar]);
+        // console.log(user[0])
+        // const user_id = user[0].id
+        // console.log(user_id)
+        // console.log(selectedAvatar)
+        //  const myAvatar = await client.query(
+        //   "UPDATE users SET avatar_id = $1 WHERE id = $2",
+        //   [ selectedAvatar, user_id]
+        // );
+        response.status(201).send(user[0]);
+    }
+    catch (error) {
+        console.error("Error creating user", error);
+        response.status(500).send({ error: "Error while creating a new user" });
+    }
 }));
 //hämta alla användare
 app.get("/user", (_request, response) => __awaiter(void 0, void 0, void 0, function* () {
@@ -76,11 +97,28 @@ app.get("/user/:id", (request, response) => __awaiter(void 0, void 0, void 0, fu
     const { rows: user } = yield client.query("SELECT * FROM users WHERE id=$1", [
         id,
     ]);
+    if (user.length === 0)
+        response.status(404).send();
     // const user = await client.query(
     //   "SELECT * FROM users INNER JOIN avatars ON users.avatar_id = avatar.id WHERE users.id = $1",
     //   [id]
     // );
     response.send(user);
+}));
+//hämta user baserat på email
+app.get("/user/email/:email", (request, response) => __awaiter(void 0, void 0, void 0, function* () {
+    const email = request.params.email;
+    const { rows: user } = yield client.query("SELECT * FROM users WHERE email=$1", [
+        email,
+    ]);
+    if (user.length === 0)
+        response.status(404).send();
+    console.log(user);
+    // const user = await client.query(
+    //   "SELECT * FROM users INNER JOIN avatars ON users.avatar_id = avatar.id WHERE users.id = $1",
+    //   [id]
+    // );
+    response.send(user[0]);
 }));
 //login
 app.post("/login", (request, response) => __awaiter(void 0, void 0, void 0, function* () {
@@ -88,38 +126,22 @@ app.post("/login", (request, response) => __awaiter(void 0, void 0, void 0, func
     // console.log(request.body);
     try {
         const existingUser = yield client.query("SELECT * FROM users WHERE email=$1 AND password=$2", [email, password]);
-        // if (existingUser.rows.length === 0) {
-        //   return response.status(401).send("Epost eller lösenord finns ej");
-        // }
+        if (existingUser.rows.length === 0) {
+            response.status(401).send("Epost eller lösenord finns ej");
+        }
         const user_id = existingUser.rows[0].id;
         const token = (0, uuid_1.v4)();
         yield client.query("INSERT INTO tokens (user_id, token) VALUES($1, $2)", [
             user_id,
             token,
         ]);
-        response.setHeader("Set-Cookie", `token=${token}; Path= /`);
+        response.setHeader("Set-Cookie", `token=${token}; Path=/;`);
         // console.log(request.cookies.token)
         response.status(201).send(request.cookies.token);
     }
     catch (error) {
-        response.status(500).send("ett fel har inträffat vid inloggningen");
+        response.status(500).send("ett fel har inträffat vid inloggningen" + error);
     }
-    // }
-    // const existingUser = await client.query(
-    //   "SELECT * FROM users WHERE email=$1 AND password=$2",
-    //   [email, password]
-    // );
-    // if (existingUser.rows.length === 0) {
-    //   return response.status(401).send("Epost eller lösenord finns ej");
-    // }
-    // const user_id = existingUser.rows[0].id;
-    // const token = uuidv4();
-    // await client.query("INSERT INTO tokens (user_id, token) VALUES($1, $2)", [
-    //   user_id,
-    //   token,
-    // ]);
-    // response.setHeader("Set-Cookie", `token=${token}; Path= /`);
-    // response.status(201).send(request.cookies.token);
 }));
 // logout
 app.post("/logout", authenticate, (request, response) => __awaiter(void 0, void 0, void 0, function* () {
@@ -139,6 +161,12 @@ app.post("/logout", authenticate, (request, response) => __awaiter(void 0, void 
 app.get("/avatars", (_request, response) => __awaiter(void 0, void 0, void 0, function* () {
     const { rows: avatar } = yield client.query("SELECT * FROM avatars");
     response.send(avatar);
+}));
+//hämta specifik avatar
+app.get("/avatars/:id", (request, response) => __awaiter(void 0, void 0, void 0, function* () {
+    const avatarId = request.params.id;
+    const { rows: avatar } = yield client.query("SELECT avatar FROM avatars WHERE id=$1", [avatarId]);
+    response.send(avatar[0]);
 }));
 //Välj avatar till din användare genom att uppdatera users-tabellen
 app.post("/user/avatar", (request, response) => __awaiter(void 0, void 0, void 0, function* () {

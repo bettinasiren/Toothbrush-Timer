@@ -1,13 +1,14 @@
 import { useEffect, useState } from "react";
+import  { useAuth }  from "../context/UserContext"
 
 interface AvatarType {
   id: number;
   avatar: string;
 }
 
-
 function Avatars() {
   const [avatars, setAvatars] = useState<AvatarType[]>([]);
+  const { userId } = useAuth()
 
   useEffect(() => {
     getAvatars();
@@ -22,28 +23,27 @@ function Avatars() {
       });
   }
 
-
-
-  async function selectAvatar() {
-
-    await fetch(`http://localhost:3000/user/avatar?userId=1&avatarId=2}`, {
+  async function selectAvatar(id: number) {
+    await fetch(`http://localhost:3000/user/avatar?userId=${userId}&avatarId=${id}`, {
       method: "PUT",
-      body: JSON.stringify({
-        userId: Number,
-        avatarId: Number,
-      }),
+      // body: JSON.stringify({
+      // id,
+      // avatar
+
+      // }),
     })
-    .then((res) => res.json())
+    .then((res) => console.log(res))
     .then((json)=> console.log(json))
   }
 
   return (
     <>
       <p>Välj avatar </p>
+      {userId}
       {avatars &&
         avatars.map((avatar) => (
-          <ul onClick={selectAvatar} key={avatar.id}>
-            <img src={avatar.avatar}  alt="Avatar" />
+          <ul onClick={() => selectAvatar(avatar.id)} key={avatar.id}>
+            <img src={avatar.avatar} alt="Avatar" />
           </ul>
         ))}
       {/* {avatars &&

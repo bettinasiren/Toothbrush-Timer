@@ -3,14 +3,11 @@ import ProgressBar from "./ProgressBar";
 import confetti from "canvas-confetti";
 import { Link } from "react-router-dom";
 
-interface BrushingSessionType {
-  user_id: number;
-}
+// interface BrushingSessionType {
+//   user_id: number;
+// }
 
-function BrushingTimer(props: BrushingSessionType) {
-  const [_brushingSession, _setBrushingSession] = useState<
-    BrushingSessionType[]
-  >([]);
+function BrushingTimer() {
   const [timer, _setTimer] = useState(0.1);
   const [isActive, setIsActive] = useState(false);
   const [timeLeft, setTimeLeft] = useState(0.1);
@@ -22,7 +19,7 @@ function BrushingTimer(props: BrushingSessionType) {
   let seconds = timeInSeconds - timer * 60;
 
   useEffect(() => {
-    let brushingTimer: number;
+    let brushingTimer: string | number | NodeJS.Timeout | undefined;
     if (isActive && timeLeft > 0) {
       brushingTimer = setTimeout(() => {
         setTimeLeft((prevTime) => prevTime - 1); //kollar på tiden i procent och minskar med en.
@@ -55,20 +52,20 @@ function BrushingTimer(props: BrushingSessionType) {
     setProgressDone(false);
   }
 
-  async function handleBrushingSession() {
-    await fetch(`http://localhost:3000/brushing/`, {
-      method: "PUT",
-      body: JSON.stringify({
-        user_id: 1,
-      }),
-      headers: {
-        Accept: "application/json",
-        "Content-Type": "application/json",
-      },
-    })
-      .then((res) => res.json())
-      .then((json) => console.log(json));
-  }
+  // async function handleBrushingSession() {
+  //   await fetch(`http://localhost:3000/brushing/`, {
+  //     method: "PUT",
+  //     body: JSON.stringify({
+  //       user_id: 1,
+  //     }),
+  //     headers: {
+  //       Accept: "application/json",
+  //       "Content-Type": "application/json",
+  //     },
+  //   })
+  //     .then((res) => res.json())
+  //     .then((json) => console.log(json));
+  // }
 
   return (
     <>

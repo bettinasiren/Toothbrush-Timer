@@ -7,7 +7,9 @@ DROP TABLE IF EXISTS tokens CASCADE;
 
 CREATE TABLE avatars (
   id SERIAL PRIMARY KEY,
-  avatar TEXT
+  avatar TEXT,
+  user_id INT,
+  CONSTRAINT fk_users FOREIGN KEY (user_id) REFERENCES users(id)
 );
 
 CREATE TABLE users (
