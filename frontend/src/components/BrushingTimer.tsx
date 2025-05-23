@@ -2,17 +2,21 @@ import { useEffect, useState } from "react";
 import ProgressBar from "./ProgressBar";
 import confetti from "canvas-confetti";
 import { Link } from "react-router-dom";
+import { useAuth } from "../context/UserContext"
 
 // interface BrushingSessionType {
 //   user_id: number;
 // }
 
 function BrushingTimer() {
-  const [timer, _setTimer] = useState(0.1);
+  const { userId, earnedMedals, setEarnedMedals } = useAuth()
+  const [timer, _setTimer] = useState(0.05);
   const [isActive, setIsActive] = useState(false);
   const [timeLeft, setTimeLeft] = useState(0.1);
   const [progressDone, setProgressDone] = useState(false);
   const [progress, setProgress] = useState(0); //börjar på 0 %
+  const [earnedMedalMessage, setEarnedMedalMessage] = useState(true)
+
 
   // let timeInMilliseconds = timer * 60 * 1000;
   let timeInSeconds = timer * 60;
@@ -29,11 +33,12 @@ function BrushingTimer() {
           return newProgress < 0 ? 0 : newProgress;
         }); //gör en ny progress baserat på tidigare tid(prevTime är värdet av tiden i procent och representerar hur många procent som är kvar i progressbaren) + timer(som börjar på två minuter * 60 (konverterar detta till sekunder (vill konvertera till millisecunder)))
       }, 1000);
-    } else if (timeLeft === 0) {
+    } else if (isActive && timeLeft === 0) {
       setIsActive(false);
       setProgressDone(true);
       confetti();
       setProgress(0);
+      handleBrushingSession()
     }
 
     return () => clearTimeout(brushingTimer);
@@ -52,25 +57,25 @@ function BrushingTimer() {
     setProgressDone(false);
   }
 
-  // async function handleBrushingSession() {
-  //   await fetch(`http://localhost:3000/brushing/`, {
-  //     method: "PUT",
-  //     body: JSON.stringify({
-  //       user_id: 1,
-  //     }),
-  //     headers: {
-  //       Accept: "application/json",
-  //       "Content-Type": "application/json",
-  //     },
-  //   })
-  //     .then((res) => res.json())
-  //     .then((json) => console.log(json));
-  // }
+  async function handleBrushingSession() {
+    await fetch(`http://localhost:3000/brushing/${userId}`, {
+      method: "POST",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      },
+    })
+      .then((res) =>res.json())
+      .then((data) => {
+          console.log(data)
+
+      });
+  }
 
   return (
     <>
       {" "}
-      {!isActive && (
+      {!isActive && !progressDone && (
         <button onClick={handleButtonClick}>Start brushing-timer</button>
       )}
       {isActive && (
@@ -84,12 +89,15 @@ function BrushingTimer() {
       {!isActive && progressDone && (
         <>
           <div> Du klarade det!</div>
-          <button onClick={handleBrushingSession}>
+          <button>
             {" "}
             <Link to={"/home"}> Gå till main</Link>
           </button>
         </>
       )}
+      {/* {earnedMedalMessage && progressDone && !isActive && (
+        <div>du har {earnedMedals} medaljer</div>
+      )} */}
     </>
   );
 }

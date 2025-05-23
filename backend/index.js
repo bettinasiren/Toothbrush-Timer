@@ -62,7 +62,7 @@ app.post("/user", (request, response) => __awaiter(void 0, void 0, void 0, funct
     const { username, password, email, selectedAvatar } = request.body;
     console.log(request.body);
     try {
-        const { rows: avatars } = yield client.query("SELECT * FROM avatars WHERE =$1", [selectedAvatar]);
+        const { rows: avatars } = yield client.query("SELECT * FROM avatars WHERE id = $1", [selectedAvatar]);
         if (avatars.length === 0) {
             response.status(400).send("No avatar exists");
         }
@@ -179,21 +179,33 @@ app.post("/user/avatar", (request, response) => __awaiter(void 0, void 0, void 0
 //     Spel, borsta tänderna, får medalj
 //---------------------------------------------------
 // lägg till ett värde för varje gång man har borstat tänderna
-app.post("/brushing", (request, response) => __awaiter(void 0, void 0, void 0, function* () {
-    const userId = request.body.user_id;
+app.post("/brushing/:id", (request, response) => __awaiter(void 0, void 0, void 0, function* () {
+    const userId = request.params.id;
     const { rows: brushingSession } = yield client.query("INSERT INTO brushing_tracker (user_id) VALUES ($1)", [userId]);
-    response.send(brushingSession);
+    // if(brushingSession.length === 0 ){
+    //   response.status(401).send("Tandbortsning ej slutförd och loggad ");
+    // }
+    const { rows: brushingSessionUser } = yield client.query("SELECT * FROM brushing_tracker WHERE user_id=$1", [userId]);
+    // const earnedMedal = Math.floor(brushingSession.length / 5);
+    //   const newMedal = await client.query(
+    //   "INSERT INTO user_medals (user_id, medal_id) VALUES ($1, $2)",
+    //   [userId, earnedMedal]
+    // );
+    response.send(brushingSessionUser);
 }));
 //hämta alla tandborsts-sessioner per användare och delar med 5 för att få fram hur många medaljer användaren ska ha
-app.get("/brushing", (request, response) => __awaiter(void 0, void 0, void 0, function* () {
-    const userId = request.body.user_id;
+app.get("/brushing/:id", (request, response) => __awaiter(void 0, void 0, void 0, function* () {
+    const userId = request.params.id;
     const { rows: brushingSession } = yield client.query("SELECT * FROM brushing_tracker WHERE user_id=$1", [userId]);
-    const earnedMedal = Math.floor(brushingSession.length / 5);
-    const newMedal = yield client.query("INSERT INTO user_medals (user_id, medal_id) VALUES ($1, $2)", [userId, earnedMedal]);
-    console.log(brushingSession.length);
-    console.log(earnedMedal);
-    console.log(newMedal);
-    response.send(newMedal);
+    // const earnedMedal = Math.floor(brushingSession.length / 5);
+    // const newMedal = await client.query(
+    //   "INSERT INTO user_medals (user_id, medal_id) VALUES ($1, $2)",
+    //   [userId, earnedMedal]
+    // );
+    // console.log(brushingSession.length);
+    // console.log(earnedMedal);
+    // console.log(newMedal);
+    response.send(brushingSession);
 }));
 //hämta medaljer
 app.get("/medals", (_request, response) => __awaiter(void 0, void 0, void 0, function* () {

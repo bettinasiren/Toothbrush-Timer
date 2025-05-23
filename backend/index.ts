@@ -58,7 +58,7 @@ interface AvatarType {
 }
 
 interface MedalType {
-  medal_name: string;
+  medal_name: string
   medal_image: string;
   criteria: string;
   user_id: number;
@@ -121,7 +121,7 @@ app.post("/user", async (request, response) => {
   const { username, password, email, selectedAvatar }: UserType = request.body;
   console.log(request.body);
  try{
-  const { rows: avatars } = await client.query("SELECT * FROM avatars WHERE =$1", [selectedAvatar])
+  const { rows: avatars } = await client.query("SELECT * FROM avatars WHERE id = $1", [selectedAvatar])
 
   if(avatars.length === 0){
     response.status(400).send("No avatar exists")
@@ -279,38 +279,55 @@ app.post("/user/avatar", async (request, response) => {
 //---------------------------------------------------
 
 // lägg till ett värde för varje gång man har borstat tänderna
-app.post("/brushing", async (request, response) => {
-  const userId = request.body.user_id;
+app.post("/brushing/:id", async (request, response) => {
+  const userId = request.params.id;
 
   const { rows: brushingSession } = await client.query(
     "INSERT INTO brushing_tracker (user_id) VALUES ($1)",
     [userId]
   );
 
-  response.send(brushingSession);
+  // if(brushingSession.length === 0 ){
+  //   response.status(401).send("Tandbortsning ej slutförd och loggad ");
+  // }
+
+  const { rows: brushingSessionUser } = await client.query(
+    "SELECT * FROM brushing_tracker WHERE user_id=$1",
+    [userId]
+  );
+
+  // const earnedMedal = Math.floor(brushingSession.length / 5);
+
+  //   const newMedal = await client.query(
+  //   "INSERT INTO user_medals (user_id, medal_id) VALUES ($1, $2)",
+  //   [userId, earnedMedal]
+  // );
+
+
+  response.send(brushingSessionUser);
 });
 
 //hämta alla tandborsts-sessioner per användare och delar med 5 för att få fram hur många medaljer användaren ska ha
-app.get("/brushing", async (request, response) => {
-  const userId: number = request.body.user_id;
+app.get("/brushing/:id", async (request, response) => {
+  const userId = request.params.id;
   const { rows: brushingSession } = await client.query(
     "SELECT * FROM brushing_tracker WHERE user_id=$1",
     [userId]
   );
 
-  const earnedMedal = Math.floor(brushingSession.length / 5);
+  // const earnedMedal = Math.floor(brushingSession.length / 5);
 
-  const newMedal = await client.query(
-    "INSERT INTO user_medals (user_id, medal_id) VALUES ($1, $2)",
-    [userId, earnedMedal]
-  );
+  // const newMedal = await client.query(
+  //   "INSERT INTO user_medals (user_id, medal_id) VALUES ($1, $2)",
+  //   [userId, earnedMedal]
+  // );
 
-  console.log(brushingSession.length);
+  // console.log(brushingSession.length);
 
-  console.log(earnedMedal);
-  console.log(newMedal);
+  // console.log(earnedMedal);
+  // console.log(newMedal);
 
-  response.send(newMedal);
+  response.send(brushingSession);
 });
 
 //hämta medaljer

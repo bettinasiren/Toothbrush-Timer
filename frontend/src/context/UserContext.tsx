@@ -8,6 +8,7 @@ interface AuthUserType {
   userName: string;
   userAvatarId: number | null;
   userAvatarImg: string;
+  earnedMedals: number |null
 }
 
 const UserContext = React.createContext<AuthUserType | undefined>(undefined);
@@ -24,6 +25,7 @@ const UserContextProvider: React.FC<{ children: ReactNode }> = ({
   const [userName, setUserName] = useState("");
   const [userAvatarId, setUserAvatarId] = useState<number | null>(null);
   const [userAvatarImg, setUserAvatarImg] = useState("");
+  const [earnedMedals, setEarnedMedals] = useState<number | null>(null)
 
   async function fetchUserData() {
     await fetch(`http://localhost:3000/user/${userId}`)
@@ -38,6 +40,7 @@ const UserContextProvider: React.FC<{ children: ReactNode }> = ({
   useEffect(() => {
     if (userId) {
       fetchUserData();
+      fetchUserMedals()
     }
     if (userAvatarId) {
       fetchUserAvatar();
@@ -49,10 +52,14 @@ const UserContextProvider: React.FC<{ children: ReactNode }> = ({
     //     setIsLoggedIn(true)
     //     setAuthUser(user)
     // })
-  }, [userId, userAvatarId]);
+  }, [userId, userAvatarId,]);
 
   // async function fetchMedals(){
-
+  //  await fetch(`http://localhost:3000/medals`)
+  //     .then((res) => res.json())
+  //     .then((data) => {
+  //       console.log(data)
+  //     });
   // }
 
   async function fetchUserAvatar() {
@@ -64,6 +71,16 @@ const UserContextProvider: React.FC<{ children: ReactNode }> = ({
       });
   }
 
+  async function fetchUserMedals(){
+     await fetch(`http://localhost:3000/brushing/${userId}`)
+      .then((res) => res.json())
+      .then((data) => {
+        const earnedMedals = Math.floor(data.length / 5);
+          setEarnedMedals(earnedMedals);
+           console.log(earnedMedals)
+      });
+  }
+
   const value: AuthUserType = {
     userId,
     setUserId,
@@ -71,7 +88,8 @@ const UserContextProvider: React.FC<{ children: ReactNode }> = ({
     setIsLoggedIn,
     userName,
     userAvatarId,
-    userAvatarImg
+    userAvatarImg,
+    earnedMedals,
   };
 
   return <UserContext.Provider value={value}>{children}</UserContext.Provider>;

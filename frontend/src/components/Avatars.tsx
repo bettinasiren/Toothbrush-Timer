@@ -26,11 +26,6 @@ function Avatars() {
   async function selectAvatar(id: number) {
     await fetch(`http://localhost:3000/user/avatar?userId=${userId}&avatarId=${id}`, {
       method: "PUT",
-      // body: JSON.stringify({
-      // id,
-      // avatar
-
-      // }),
     })
     .then((res) => console.log(res))
     .then((json)=> console.log(json))
@@ -46,13 +41,6 @@ function Avatars() {
             <img src={avatar.avatar} alt="Avatar" />
           </ul>
         ))}
-      {/* {avatars &&
-      avatars.map((avatar) => (
-        <ul>
-          <img src={avatar.data.avatar} alt="" />
-        </ul>
-      )} */}
-      <button>spara info</button>
     </>
   );
 }
