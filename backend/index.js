@@ -38,11 +38,9 @@ function authenticate(request, response, next) {
             (request.body && request.body.token) ||
             (request.headers && request.headers["authorization"]) ||
             (request.cookies && request.cookies.token);
-        // console.log(token);
         if (!token) {
             response.status(401).send("finns ingen token");
         }
-        //  console.log("token:", token)
         const validToken = yield client.query("SELECT * FROM tokens WHERE token=$1", [
             token,
         ]);
@@ -55,6 +53,16 @@ function authenticate(request, response, next) {
         next();
     });
 }
+app.get("/token/:token", (request, response) => __awaiter(void 0, void 0, void 0, function* () {
+    const token = request.params.token;
+    const { rows: userId } = yield client.query("SELECT user_id FROM tokens WHERE token=$1", [
+        token,
+    ]);
+    if (!userId) {
+        response.status(404).send();
+    }
+    response.status(200).send(userId[0]);
+}));
 // app.use("/",userRoutes)
 //--------------------Skapa och Visa---------------------
 // skapa user
@@ -67,14 +75,6 @@ app.post("/user", (request, response) => __awaiter(void 0, void 0, void 0, funct
             response.status(400).send("No avatar exists");
         }
         const { rows: user } = yield client.query("INSERT INTO users (username, password, email, avatar_id) VALUES ($1, $2, $3, $4) RETURNING *", [username, password, email, selectedAvatar]);
-        // console.log(user[0])
-        // const user_id = user[0].id
-        // console.log(user_id)
-        // console.log(selectedAvatar)
-        //  const myAvatar = await client.query(
-        //   "UPDATE users SET avatar_id = $1 WHERE id = $2",
-        //   [ selectedAvatar, user_id]
-        // );
         response.status(201).send(user[0]);
     }
     catch (error) {
@@ -103,7 +103,8 @@ app.get("/user/:id", (request, response) => __awaiter(void 0, void 0, void 0, fu
     //   "SELECT * FROM users INNER JOIN avatars ON users.avatar_id = avatar.id WHERE users.id = $1",
     //   [id]
     // );
-    response.send(user);
+    console.log(user);
+    response.send(user[0]);
 }));
 //hämta user baserat på email
 app.get("/user/email/:email", (request, response) => __awaiter(void 0, void 0, void 0, function* () {
@@ -123,7 +124,6 @@ app.get("/user/email/:email", (request, response) => __awaiter(void 0, void 0, v
 //login
 app.post("/login", (request, response) => __awaiter(void 0, void 0, void 0, function* () {
     const { email, password } = request.body;
-    // console.log(request.body);
     try {
         const existingUser = yield client.query("SELECT * FROM users WHERE email=$1 AND password=$2", [email, password]);
         if (existingUser.rows.length === 0) {
@@ -135,7 +135,7 @@ app.post("/login", (request, response) => __awaiter(void 0, void 0, void 0, func
             user_id,
             token,
         ]);
-        response.setHeader("Set-Cookie", `token=${token}; Path=/;`);
+        response.setHeader("Set-Cookie", `tbtimer_token=${token}; Path=/;`);
         // console.log(request.cookies.token)
         response.status(201).send(request.cookies.token);
     }
@@ -146,15 +146,14 @@ app.post("/login", (request, response) => __awaiter(void 0, void 0, void 0, func
 // logout
 app.post("/logout", authenticate, (request, response) => __awaiter(void 0, void 0, void 0, function* () {
     var _a;
-    //  console.log(request.user)
     const user_id = (_a = request.user) === null || _a === void 0 ? void 0 : _a.user_id;
-    // if (!user_id) {
-    //   return response.status(401).send("du är inte inloggad");
-    // }
+    if (!user_id) {
+        response.status(401).send("du är inte inloggad");
+    }
     yield client.query("DELETE FROM tokens WHERE user_id=$1", [
         user_id,
     ]);
-    response.clearCookie("token");
+    response.clearCookie("tbtimer_token");
     response.status(200).send();
 }));
 // hämta alla avatarer
@@ -182,9 +181,9 @@ app.post("/user/avatar", (request, response) => __awaiter(void 0, void 0, void 0
 app.post("/brushing/:id", (request, response) => __awaiter(void 0, void 0, void 0, function* () {
     const userId = request.params.id;
     const { rows: brushingSession } = yield client.query("INSERT INTO brushing_tracker (user_id) VALUES ($1)", [userId]);
-    // if(brushingSession.length === 0 ){
-    //   response.status(401).send("Tandbortsning ej slutförd och loggad ");
-    // }
+    if (brushingSession.length === 0) {
+        response.status(401).send("Tandbortsning ej slutförd och loggad ");
+    }
     const { rows: brushingSessionUser } = yield client.query("SELECT * FROM brushing_tracker WHERE user_id=$1", [userId]);
     // const earnedMedal = Math.floor(brushingSession.length / 5);
     //   const newMedal = await client.query(
@@ -193,8 +192,8 @@ app.post("/brushing/:id", (request, response) => __awaiter(void 0, void 0, void 
     // );
     response.send(brushingSessionUser);
 }));
-//hämta alla tandborsts-sessioner per användare och delar med 5 för att få fram hur många medaljer användaren ska ha
-app.get("/brushing/:id", (request, response) => __awaiter(void 0, void 0, void 0, function* () {
+//hämta alla tandborsts-sessioner per användare och delar med 5 för att få fram hur många medaljer användaren ska ha (antalet avklkarade tandborstsessioner som en användare har klarat)
+app.get("/brushingmedals/:id", (request, response) => __awaiter(void 0, void 0, void 0, function* () {
     const userId = request.params.id;
     const { rows: brushingSession } = yield client.query("SELECT * FROM brushing_tracker WHERE user_id=$1", [userId]);
     // const earnedMedal = Math.floor(brushingSession.length / 5);
@@ -207,29 +206,38 @@ app.get("/brushing/:id", (request, response) => __awaiter(void 0, void 0, void 0
     // console.log(newMedal);
     response.send(brushingSession);
 }));
-//hämta medaljer
-app.get("/medals", (_request, response) => __awaiter(void 0, void 0, void 0, function* () {
-    const { rows: medals } = yield client.query("SELECT * FROM medals");
-    response.send(medals);
-}));
-//tilldela ny medalj till användaren
-app.post("/medals/", (request, response) => __awaiter(void 0, void 0, void 0, function* () {
-    const { userId, medalId } = request.query;
-    // kolla om medaljen redan är tilldelad till användaren
-    // const { rows: userMedals } = await client.query("SELECT * FROM user_medals WHERE user_id = $1 AND medal_id = $2,", [userId, medalId]);
-    // if(userMedals.length === 0){
-    //    return response.send("du har redan denna medalj")
-    // }
-    //annars tilldela ny medalj
-    const { rows: newMedal } = yield client.query("INSERT INTO user_medals (user_id, medal_id) VALUES ($1, $2)", [userId, medalId]);
-    response.send(newMedal);
-}));
-//hämta  medaljer för en specifik användare
-app.get("/medals/:userId", (request, response) => __awaiter(void 0, void 0, void 0, function* () {
-    const id = request.params.userId;
-    const { rows: medals } = yield client.query("SELECT * FROM user_medals WHERE user_id=$1", [id]);
-    response.send(medals);
-}));
+// //hämta medaljer
+// app.get("/medals", async (_request, response) => {
+//   const { rows: medals } = await client.query("SELECT * FROM medals");
+//   response.send(medals);
+// });
+// //tilldela ny medalj till användaren
+// app.post("/medals/", async (request, response) => {
+//   const { userId, medalId } = request.query as {
+//     userId: string;
+//     medalId: string;
+//   };
+// kolla om medaljen redan är tilldelad till användaren
+// const { rows: userMedals } = await client.query("SELECT * FROM user_medals WHERE user_id = $1 AND medal_id = $2,", [userId, medalId]);
+// if(userMedals.length === 0){
+//    return response.send("du har redan denna medalj")
+// }
+//   //annars tilldela ny medalj
+//   const { rows: newMedal } = await client.query(
+//     "INSERT INTO user_medals (user_id, medal_id) VALUES ($1, $2)",
+//     [userId, medalId]
+//   );
+//   response.send(newMedal);
+// });
+// //hämta  medaljer för en specifik användare
+// app.get("/medals/:userId", async (request, response) => {
+//   const id = request.params.userId;
+//   const { rows: medals } = await client.query(
+//     "SELECT * FROM user_medals WHERE user_id=$1",
+//     [id]
+//   );
+//   response.send(medals);
+// });
 const StartServer = () => __awaiter(void 0, void 0, void 0, function* () {
     yield client.connect();
     app.listen(port, () => {

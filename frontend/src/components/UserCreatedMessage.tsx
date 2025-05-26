@@ -7,7 +7,7 @@ function UserCreatedMessage() {
       {/* <ShowUser></ShowUser> */}
       <button>
         {" "}
-        <Link to={"/home"}> Gå till Home-sidan</Link>
+        <Link to={"/home"}> Gå tillbaka till Förstasidan</Link>
       </button>
     </>
   );

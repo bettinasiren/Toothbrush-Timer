@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useAuth } from "../context/UserContext";
+import { useNavigate } from "react-router-dom"
 
 interface AvatarType {
   id: number;
@@ -20,13 +20,14 @@ interface AvatarType {
 
 // }
 function CreateAccountForm() {
-  const { userId, setIsLoggedIn, setUserId } = useAuth();
   const [username, setUserName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [avatars, setAvatars] = useState<AvatarType[]>([]);
   const [selectedAvatar, setSelectedAvatar] = useState(0);
   const [isCreated, setIsCreated] = useState(false);
+
+  const navigate = useNavigate()
 
   useEffect(() => {
     getAvatars();
@@ -64,20 +65,7 @@ function CreateAccountForm() {
       },
     }).then((response) => response.json());
     setIsCreated(true)
-    // .then((data) => {
-    //   // console.log(data)
-    //   // setUserId(data.id)
-    //   // console.log(userId)
-    //   // setIsLoggedIn(true)
-    // })
-    // .then((data) => {
-    //    console.log(data)
-    //   // setUserId(data
-    //   //   // name: data.username,
-    //   //   // id: data.id,
-    //   // );
-    //   // setIsLoggedIn(true);
-    //  });
+    navigate("/")
   }
 
   return (

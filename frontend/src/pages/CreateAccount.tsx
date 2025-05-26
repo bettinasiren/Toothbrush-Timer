@@ -6,7 +6,6 @@ function CreateAccount() {
   return (
     <>
       <CreateAccountForm></CreateAccountForm>
-      {/* <Avatars></Avatars> */}
       <UserCreatedMessage></UserCreatedMessage>
     </>
   );

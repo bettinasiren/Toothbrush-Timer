@@ -8,13 +8,18 @@ interface AuthUserType {
   userName: string;
   userAvatarId: number | null;
   userAvatarImg: string;
-  earnedMedals: number |null
 }
 
 const UserContext = React.createContext<AuthUserType | undefined>(undefined);
 
-export function useAuth() {
-  return useContext(UserContext);
+export function useAuth(): AuthUserType {
+  const context = useContext(UserContext);
+
+  if (!context) {
+    throw new Error();
+  }
+
+  return context;
 }
 
 const UserContextProvider: React.FC<{ children: ReactNode }> = ({
@@ -25,22 +30,19 @@ const UserContextProvider: React.FC<{ children: ReactNode }> = ({
   const [userName, setUserName] = useState("");
   const [userAvatarId, setUserAvatarId] = useState<number | null>(null);
   const [userAvatarImg, setUserAvatarImg] = useState("");
-  const [earnedMedals, setEarnedMedals] = useState<number | null>(null)
-
-  async function fetchUserData() {
-    await fetch(`http://localhost:3000/user/${userId}`)
-      .then((response) => response.json())
-      .then((data) => {
-        console.log(data);
-        setUserName(data[0].username);
-        setUserAvatarId(data[0].avatar_id);
-      });
-  }
 
   useEffect(() => {
+    const cookie = document.cookie
+      .split("; ") // gör en array av strängar
+      .find((row) => row.startsWith("tbtimer_token=")); //hitta min cookie på namnet
+
+    if (cookie && !userId) {
+      const token = cookie.split("=")[1];
+      fetchUserId(token);
+    }
     if (userId) {
       fetchUserData();
-      fetchUserMedals()
+      // fetchUserMedals();
     }
     if (userAvatarId) {
       fetchUserAvatar();
@@ -52,32 +54,30 @@ const UserContextProvider: React.FC<{ children: ReactNode }> = ({
     //     setIsLoggedIn(true)
     //     setAuthUser(user)
     // })
-  }, [userId, userAvatarId,]);
-
-  // async function fetchMedals(){
-  //  await fetch(`http://localhost:3000/medals`)
-  //     .then((res) => res.json())
-  //     .then((data) => {
-  //       console.log(data)
-  //     });
-  // }
+  }, [userId, userAvatarId, isLoggedIn]);
 
   async function fetchUserAvatar() {
     await fetch(`http://localhost:3000/avatars/${userAvatarId}`)
       .then((response) => response.json())
       .then((data) => {
-        console.log(data.avatar);
-        setUserAvatarImg(data.avatar)
+        setUserAvatarImg(data.avatar);
       });
   }
 
-  async function fetchUserMedals(){
-     await fetch(`http://localhost:3000/brushing/${userId}`)
+  async function fetchUserData() {
+    await fetch(`http://localhost:3000/user/${userId}`)
+      .then((response) => response.json())
+      .then((data) => {
+        setUserName(data.username);
+        setUserAvatarId(data.avatar_id);
+      });
+  }
+
+  async function fetchUserId(token: string) {
+    await fetch(`http://localhost:3000/token/${token}`)
       .then((res) => res.json())
       .then((data) => {
-        const earnedMedals = Math.floor(data.length / 5);
-          setEarnedMedals(earnedMedals);
-           console.log(earnedMedals)
+        setUserId(data.user_id);
       });
   }
 
@@ -89,7 +89,6 @@ const UserContextProvider: React.FC<{ children: ReactNode }> = ({
     userName,
     userAvatarId,
     userAvatarImg,
-    earnedMedals,
   };
 
   return <UserContext.Provider value={value}>{children}</UserContext.Provider>;

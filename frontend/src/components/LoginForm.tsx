@@ -4,30 +4,15 @@ import { useAuth } from "../context/UserContext";
 import { useNavigate } from "react-router-dom";
 
 function LoginForm() {
-  const { setUserId, isLoggedIn, setIsLoggedIn, userId, userName } = useAuth();
+  const { setIsLoggedIn } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
   const navigate = useNavigate();
 
-  // async function LoginUser(){
-  //   await fetch("http://localhost:3000/login",
-  //     {
-  //       method:"POST",
-  //       body: JSON.stringify({
-  //         email,
-  //         password
-  //       }),
-  //       headers: {
-  //         Accept: "application/json",
-  //         "Content-Type": "application/json",
-  //       },
-  //     })
-  //   .then((response)=> response.json())
-  //   .then((data)=> console.log(data))
-  // }
-
-  async function handleSubmit(event: { preventDefault: () => void }) {
+  async function handleSubmit(
+    event: { preventDefault: () => void },
+  ) {
     event.preventDefault();
     console.log("Email", email);
 
@@ -45,13 +30,16 @@ function LoginForm() {
     }).then(async (response) => {
       console.log(response);
       if (response.ok) {
+        console.log("Response was ok");
         setIsLoggedIn(true);
-        await fetch(`http://localhost:3000/user/email/${email} `)
-          .then((response) => response.json())
-          .then((data) => {
-            console.log(data.id);
-            setUserId(data.id);
-          });
+        // await fetch(`http://localhost:3000/user/email/${email} `)
+        //   .then((response) => response.json())
+        //   .then((data) => {
+        //     console.log(data)
+        //     console.log(data.id);
+        //     setUserId(data.id);
+        //     // localStorage.setItem(
+        //   });
         navigate("/home");
       }
     });

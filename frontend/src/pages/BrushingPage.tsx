@@ -1,5 +1,6 @@
 import BrushingTimer from "../components/BrushingTimer";
 
+
 function BrushingPage() {
   return (
     <>

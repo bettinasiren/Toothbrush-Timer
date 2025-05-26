@@ -93,12 +93,11 @@ async function authenticate(
     (request.body && request.body.token) ||
     (request.headers && request.headers["authorization"]) ||
     (request.cookies && request.cookies.token);
-  // console.log(token);
 
   if (!token) {
     response.status(401).send("finns ingen token");
   }
-  //  console.log("token:", token)
+
   const validToken = await client.query("SELECT * FROM tokens WHERE token=$1", [
     token,
   ]);
@@ -113,6 +112,21 @@ async function authenticate(
   next();
 }
 
+app.get("/token/:token", async (request, response)=> {
+  const token = request.params.token
+
+  const {rows: userId} = await client.query("SELECT user_id FROM tokens WHERE token=$1", [
+    token,
+  ]);
+
+  if (!userId){
+  response.status(404).send();
+  }
+
+
+  response.status(200).send(userId[0])
+
+})
 // app.use("/",userRoutes)
 
 //--------------------Skapa och Visa---------------------
@@ -131,16 +145,6 @@ app.post("/user", async (request, response) => {
     "INSERT INTO users (username, password, email, avatar_id) VALUES ($1, $2, $3, $4) RETURNING *",
     [username, password, email, selectedAvatar]
   );
-
-  // console.log(user[0])
-  // const user_id = user[0].id
-  // console.log(user_id)
-  // console.log(selectedAvatar)
-
-  //  const myAvatar = await client.query(
-  //   "UPDATE users SET avatar_id = $1 WHERE id = $2",
-  //   [ selectedAvatar, user_id]
-  // );
 
   response.status(201).send(user[0]);
 
@@ -175,7 +179,9 @@ app.get("/user/:id", async (request, response) => {
   //   [id]
   // );
 
-  response.send(user);
+  console.log(user);
+
+  response.send(user[0]);
 });
 
 //hämta user baserat på email
@@ -201,7 +207,6 @@ app.get("/user/email/:email", async (request, response) => {
 //login
 app.post("/login", async (request, response) => {
   const { email, password }: UserType = request.body;
-  // console.log(request.body);
 
   try {
     const existingUser = await client.query(
@@ -220,7 +225,7 @@ app.post("/login", async (request, response) => {
       token,
     ]);
 
-    response.setHeader("Set-Cookie", `token=${token}; Path=/;`);
+    response.setHeader("Set-Cookie", `tbtimer_token=${token}; Path=/;`);
     // console.log(request.cookies.token)
     response.status(201).send(request.cookies.token);
   } catch (error) {
@@ -233,15 +238,15 @@ app.post(
   "/logout",
   authenticate,
   async (request: MyRequest, response: Response) => {
-    //  console.log(request.user)
+
     const user_id = request.user?.user_id;
-    // if (!user_id) {
-    //   return response.status(401).send("du är inte inloggad");
-    // }
+    if (!user_id) {
+     response.status(401).send("du är inte inloggad");
+    }
     await client.query("DELETE FROM tokens WHERE user_id=$1", [
       user_id,
     ]);
-    response.clearCookie("token");
+    response.clearCookie("tbtimer_token");
     response.status(200).send();
   }
 );
@@ -249,7 +254,6 @@ app.post(
 // hämta alla avatarer
 app.get("/avatars", async (_request, response) => {
   const { rows: avatar } = await client.query("SELECT * FROM avatars");
-
   response.send(avatar);
 });
 
@@ -287,9 +291,9 @@ app.post("/brushing/:id", async (request, response) => {
     [userId]
   );
 
-  // if(brushingSession.length === 0 ){
-  //   response.status(401).send("Tandbortsning ej slutförd och loggad ");
-  // }
+  if(brushingSession.length === 0 ){
+    response.status(401).send("Tandbortsning ej slutförd och loggad ");
+  }
 
   const { rows: brushingSessionUser } = await client.query(
     "SELECT * FROM brushing_tracker WHERE user_id=$1",
@@ -307,8 +311,8 @@ app.post("/brushing/:id", async (request, response) => {
   response.send(brushingSessionUser);
 });
 
-//hämta alla tandborsts-sessioner per användare och delar med 5 för att få fram hur många medaljer användaren ska ha
-app.get("/brushing/:id", async (request, response) => {
+//hämta alla tandborsts-sessioner per användare och delar med 5 för att få fram hur många medaljer användaren ska ha (antalet avklkarade tandborstsessioner som en användare har klarat)
+app.get("/brushingmedals/:id", async (request, response) => {
   const userId = request.params.id;
   const { rows: brushingSession } = await client.query(
     "SELECT * FROM brushing_tracker WHERE user_id=$1",
@@ -330,18 +334,18 @@ app.get("/brushing/:id", async (request, response) => {
   response.send(brushingSession);
 });
 
-//hämta medaljer
-app.get("/medals", async (_request, response) => {
-  const { rows: medals } = await client.query("SELECT * FROM medals");
-  response.send(medals);
-});
+// //hämta medaljer
+// app.get("/medals", async (_request, response) => {
+//   const { rows: medals } = await client.query("SELECT * FROM medals");
+//   response.send(medals);
+// });
 
-//tilldela ny medalj till användaren
-app.post("/medals/", async (request, response) => {
-  const { userId, medalId } = request.query as {
-    userId: string;
-    medalId: string;
-  };
+// //tilldela ny medalj till användaren
+// app.post("/medals/", async (request, response) => {
+//   const { userId, medalId } = request.query as {
+//     userId: string;
+//     medalId: string;
+//   };
 
   // kolla om medaljen redan är tilldelad till användaren
   // const { rows: userMedals } = await client.query("SELECT * FROM user_medals WHERE user_id = $1 AND medal_id = $2,", [userId, medalId]);
@@ -350,25 +354,25 @@ app.post("/medals/", async (request, response) => {
   //    return response.send("du har redan denna medalj")
   // }
 
-  //annars tilldela ny medalj
-  const { rows: newMedal } = await client.query(
-    "INSERT INTO user_medals (user_id, medal_id) VALUES ($1, $2)",
-    [userId, medalId]
-  );
+//   //annars tilldela ny medalj
+//   const { rows: newMedal } = await client.query(
+//     "INSERT INTO user_medals (user_id, medal_id) VALUES ($1, $2)",
+//     [userId, medalId]
+//   );
 
-  response.send(newMedal);
-});
+//   response.send(newMedal);
+// });
 
-//hämta  medaljer för en specifik användare
-app.get("/medals/:userId", async (request, response) => {
-  const id = request.params.userId;
-  const { rows: medals } = await client.query(
-    "SELECT * FROM user_medals WHERE user_id=$1",
-    [id]
-  );
+// //hämta  medaljer för en specifik användare
+// app.get("/medals/:userId", async (request, response) => {
+//   const id = request.params.userId;
+//   const { rows: medals } = await client.query(
+//     "SELECT * FROM user_medals WHERE user_id=$1",
+//     [id]
+//   );
 
-  response.send(medals);
-});
+//   response.send(medals);
+// });
 
 const StartServer = async () => {
   await client.connect();
