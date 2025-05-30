@@ -2,17 +2,18 @@ import { useState } from "react";
 import { Link } from "react-router-dom";
 import { useAuth } from "../context/UserContext";
 import { useNavigate } from "react-router-dom";
+import Form from "react-bootstrap/Form";
+import Button from "react-bootstrap/Button";
+import { Container } from "react-bootstrap";
 
 function LoginForm() {
-  const { setIsLoggedIn } = useAuth();
+  const { setIsLoggedIn, isLoading } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
   const navigate = useNavigate();
 
-  async function handleSubmit(
-    event: { preventDefault: () => void },
-  ) {
+  async function handleSubmit(event: { preventDefault: () => void }) {
     event.preventDefault();
     console.log("Email", email);
 
@@ -27,55 +28,54 @@ function LoginForm() {
         "Content-Type": "application/json",
       },
       credentials: "include",
-    }).then(async (response) => {
+    }).then((response) => {
       console.log(response);
       if (response.ok) {
         console.log("Response was ok");
         setIsLoggedIn(true);
-        // await fetch(`http://localhost:3000/user/email/${email} `)
-        //   .then((response) => response.json())
-        //   .then((data) => {
-        //     console.log(data)
-        //     console.log(data.id);
-        //     setUserId(data.id);
-        //     // localStorage.setItem(
-        //   });
-        navigate("/home");
+        navigate("/");
       }
     });
   }
 
+    if(isLoading){
+    return <div>Loading...</div>
+  }
+
   return (
     <>
-      <form onSubmit={handleSubmit}>
-        <legend>
-          <h3>Logga in för att börja borsta</h3>
-        </legend>
-        <label>
-          Användarnamn
-          <input
+      <Form onSubmit={handleSubmit}>
+        <Form.Group className="mb-3" controlId="formBasicEmail">
+          <legend>
+            <h3>Logga in för att börja borsta</h3>
+          </legend>
+          <Form.Label>Mejl</Form.Label>
+          <Form.Control
             name="email"
             type="email"
             placeholder="Mejl"
             value={email}
             onChange={(event) => setEmail(event.target.value)}
           />
-        </label>
-        <label>
-          Lösenord
-          <input
+          {/* <Form.Text className="text-muted">
+            <p>Din mejladress kommer inte delas med någon annan</p>
+          </Form.Text> */}
+        </Form.Group>
+        <Form.Group className="mb-3" controlId="formBasicPassword">
+          <Form.Label> Lösenord</Form.Label>
+          <Form.Control
             name="password"
             type="password"
             placeholder="Lösenord"
             value={password}
             onChange={(event) => setPassword(event.target.value)}
           />
-        </label>
-        <button type="submit">Logga in</button>
-      </form>
-      <p>
-        <Link to={"/create-account"}>Har du inget konto, skapa ett här</Link>
-      </p>
+        </Form.Group>
+        <Button type="submit">Logga in</Button>
+      </Form>
+      <Container className="md-3">
+          <Link to="/create-account">Har du inget konto, skapa ett här</Link>
+      </Container>
     </>
   );
 }

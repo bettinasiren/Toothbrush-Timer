@@ -26,20 +26,23 @@ const client = new pg_1.Client({
     connectionString: process.env.PGURI,
 });
 app.use((0, cors_1.default)({
-    origin: 'http://localhost:5173',
-    credentials: true
+    origin: "http://localhost:5173",
+    credentials: true,
 }));
 app.use(express_1.default.json());
 app.use((0, cookie_parser_1.default)());
 //egen middleware för authentification
 function authenticate(request, response, next) {
     return __awaiter(this, void 0, void 0, function* () {
-        const token = (request.query && request.query.token) ||
-            (request.body && request.body.token) ||
-            (request.headers && request.headers["authorization"]) ||
-            (request.cookies && request.cookies.token);
+        const token = 
+        // (request.query && request.query.token) ||
+        // (request.body && request.body.token) ||
+        // (request.headers && request.headers["authorization"]) ||
+        (request.cookies && request.cookies.tbtimer_token);
+        console.log("token received:", token);
         if (!token) {
             response.status(401).send("finns ingen token");
+            return;
         }
         const validToken = yield client.query("SELECT * FROM tokens WHERE token=$1", [
             token,
@@ -47,19 +50,19 @@ function authenticate(request, response, next) {
         console.log("valid token:", validToken);
         if (validToken.rows.length === 0 || validToken.rows[0].token !== token) {
             response.status(401).send("inte ett giltigt tokenvärde");
+            return;
         }
+        console.log("hej", validToken.rows);
         request.user = { user_id: validToken.rows[0].user_id };
-        console.log(request.user);
+        console.log("user:", request.user);
         next();
     });
 }
 app.get("/token/:token", (request, response) => __awaiter(void 0, void 0, void 0, function* () {
     const token = request.params.token;
-    const { rows: userId } = yield client.query("SELECT user_id FROM tokens WHERE token=$1", [
-        token,
-    ]);
+    const { rows: userId } = yield client.query("SELECT user_id FROM tokens WHERE token=$1", [token]);
     if (!userId) {
-        response.status(404).send();
+        response.status(404).send("userId finns ej");
     }
     response.status(200).send(userId[0]);
 }));
@@ -109,9 +112,7 @@ app.get("/user/:id", (request, response) => __awaiter(void 0, void 0, void 0, fu
 //hämta user baserat på email
 app.get("/user/email/:email", (request, response) => __awaiter(void 0, void 0, void 0, function* () {
     const email = request.params.email;
-    const { rows: user } = yield client.query("SELECT * FROM users WHERE email=$1", [
-        email,
-    ]);
+    const { rows: user } = yield client.query("SELECT * FROM users WHERE email=$1", [email]);
     if (user.length === 0)
         response.status(404).send();
     console.log(user);
@@ -150,9 +151,7 @@ app.post("/logout", authenticate, (request, response) => __awaiter(void 0, void 
     if (!user_id) {
         response.status(401).send("du är inte inloggad");
     }
-    yield client.query("DELETE FROM tokens WHERE user_id=$1", [
-        user_id,
-    ]);
+    yield client.query("DELETE FROM tokens WHERE user_id=$1", [user_id]);
     response.clearCookie("tbtimer_token");
     response.status(200).send();
 }));
@@ -180,9 +179,9 @@ app.post("/user/avatar", (request, response) => __awaiter(void 0, void 0, void 0
 // lägg till ett värde för varje gång man har borstat tänderna
 app.post("/brushing/:id", (request, response) => __awaiter(void 0, void 0, void 0, function* () {
     const userId = request.params.id;
-    const { rows: brushingSession } = yield client.query("INSERT INTO brushing_tracker (user_id) VALUES ($1)", [userId]);
-    if (brushingSession.length === 0) {
-        response.status(401).send("Tandbortsning ej slutförd och loggad ");
+    const brushingSession = yield client.query("INSERT INTO brushing_tracker (user_id) VALUES ($1)", [userId]);
+    if (brushingSession.rowCount === 0) {
+        response.status(500).send("Kunde inte lägga in i databasen");
     }
     const { rows: brushingSessionUser } = yield client.query("SELECT * FROM brushing_tracker WHERE user_id=$1", [userId]);
     // const earnedMedal = Math.floor(brushingSession.length / 5);

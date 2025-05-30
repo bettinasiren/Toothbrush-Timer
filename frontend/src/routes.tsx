@@ -1,10 +1,10 @@
 import { createBrowserRouter } from "react-router-dom";
-import Home from "./pages/Home";
-import Start from "./pages/Start";
+// import Home from "./pages/Home";
 import CreateAccount from "./pages/CreateAccount";
 import Layout from "./components/Layout";
 import BrushingPage from "./pages/BrushingPage";
-
+import PrivateRoutes from "./components/PrivateRoutes";
+import Start from "./pages/Start";
 
 const routes = createBrowserRouter([
   {
@@ -12,9 +12,14 @@ const routes = createBrowserRouter([
     element: <Layout />,
     children: [
       { element: <Start />, path: "/" },
-      { element: <Home />, path: "/home/" },
       { element: <CreateAccount />, path: "/create-account/" },
-      { element: <BrushingPage />, path: "/brushing-page" },
+      {
+        element: <PrivateRoutes />,
+        children: [
+          // { element: <Home />, path: "/home/" },
+          { element: <BrushingPage />, path: "/brushing-page" },
+        ],
+      },
     ],
   },
 ]);

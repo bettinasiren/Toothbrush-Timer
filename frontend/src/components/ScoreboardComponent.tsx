@@ -1,22 +1,18 @@
 import { useAuth } from "../context/UserContext";
-import { medalImage } from "../assets/images";
+import { diamondImage, medalImage, starImage } from "../assets/images";
 import { useEffect, useState } from "react";
 import styled from "styled-components";
 // import { useState } from "react";
 
-// interface MedalType {
-//   id: number;
-//   medal_name: string;
-//   medal_image: string;
-//   criteria: string;
-//   user_id: number;
-// }
+interface MedalType {
+  id: number;
+  image: string;
+}
 
 const ScoreBoardWrapper = styled.div`
-width: 100%;
-height: 100px;
-
-`
+  width: 100%;
+  height: 100px;
+`;
 const MedalScoreBoard = styled.div`
   background-color: #4caf50;
   width: 250px;
@@ -26,7 +22,7 @@ const MedalScoreBoard = styled.div`
   align-items: center;
 `;
 
-const MedalImage = styled.img`
+const PrizeImage = styled.img`
   height: 50px;
   width: 50px;
   display: flex;
@@ -37,12 +33,30 @@ const MedalImage = styled.img`
 function ScoreboardComponent() {
   const { userId } = useAuth();
   const [earnedMedals, setEarnedMedals] = useState<number>(0);
-  const medals = [];
+  const [medals, setMedals] = useState<MedalType[]>([]);
+  const [stars, setStars] = useState<MedalType[]>([]);
 
-  //skapar en array som heter medals med antalet tilldelade medaljer
-  for (let i = 0; i < earnedMedals; i++) {
-    medals.push(medalImage);
-  }
+  const [diamonds, setDiamonds] = useState<MedalType[]>([]);
+
+  useEffect(() => {
+    const newMedals = [];
+    const newStars = [];
+    const newDiamonds = [];
+    //skapar en array som heter images med antalet tilldelade medaljer och villkor för vilka medaljer man har uppnåt
+    for (let i = 0; i < earnedMedals; i++) {
+      if (i < 5) {
+        newMedals.push({ id: i, image: medalImage });
+      } else if (i >= 5 && i < 10) {
+        newStars.push({ id: i - 5, image: starImage });
+      } else if (i >= 11 && i < 16) {
+        newDiamonds.push({ id: i - 11, image: diamondImage });
+      }
+    }
+
+    setMedals(newMedals);
+    setStars(newStars);
+    setDiamonds(newDiamonds);
+  }, [earnedMedals]);
 
   async function fetchUserMedals() {
     await fetch(`http://localhost:3000/brushingmedals/${userId}`)
@@ -50,9 +64,6 @@ function ScoreboardComponent() {
       .then((data) => {
         let earnedMedals = Math.floor(data.length / 5);
         setEarnedMedals(earnedMedals);
-        // if(earnedMedals <= 6){
-        //   setEarnedMedals(0)
-        // }
       });
   }
 
@@ -65,27 +76,46 @@ function ScoreboardComponent() {
   return (
     <>
       Här ska medaljerna visas
-      {earnedMedals === 0 ? (
-        <p>visa inget?</p>
-      ) : (
+      {earnedMedals === 0 && (
+        <div>
+          <MedalScoreBoard></MedalScoreBoard>
+        </div>
+      )}
+      {earnedMedals <= 5 && (
         <ScoreBoardWrapper>
           <p>Du har {earnedMedals} st medaljer </p>
           <MedalScoreBoard>
-              {" "}
-              {medals.map((medal) => (
-                <MedalImage src={medal} alt="Avatar" />
-              ))}
+            {" "}
+            {medals.map((medal) => (
+              <PrizeImage key={medal.id} src={medal.image} alt="medal" />
+            ))}
           </MedalScoreBoard>
         </ScoreBoardWrapper>
       )}
-
-      {earnedMedals > 6 &&
-      <p>Du borde få troféer istället</p>
-
-      }
-      {earnedMedals > 11 &&
-      <p>Du borde få diamanter istället </p>
-      }
+      {earnedMedals >= 6 && earnedMedals < 11 && (
+        <>
+          <ScoreBoardWrapper>
+            <p>Du har {earnedMedals} st medaljer </p>
+            <MedalScoreBoard>
+              {" "}
+              {stars.map((star) => (
+                <PrizeImage key={star.id} src={star.image} alt="star" />
+              ))}
+            </MedalScoreBoard>
+          </ScoreBoardWrapper>
+        </>
+      )}
+      {earnedMedals >= 11 && (
+        <ScoreBoardWrapper>
+          <p>Du har {earnedMedals} st medaljer </p>
+          <MedalScoreBoard>
+            {" "}
+            {diamonds.map((diamond) => (
+              <PrizeImage key={diamond.id} src={diamond.image} alt="diamond" />
+            ))}
+          </MedalScoreBoard>
+        </ScoreBoardWrapper>
+      )}
     </>
   );
 }

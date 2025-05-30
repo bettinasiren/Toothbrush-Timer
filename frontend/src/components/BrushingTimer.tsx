@@ -1,9 +1,11 @@
 import { useEffect, useRef, useState } from "react";
 import ProgressBar from "./ProgressBar";
 import confetti from "canvas-confetti";
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "../context/UserContext";
 import { StarWarsMusic } from "../assets/music";
+import DancingAvatar from "./DancingAvatar";
+import Button from "react-bootstrap/Button";
 
 // interface BrushingSessionType {
 //   user_id: number;
@@ -17,14 +19,14 @@ function BrushingTimer() {
   const [progressDone, setProgressDone] = useState(false);
   const [progress, setProgress] = useState(0); //börjar på 0 %
   // const [earnedMedalMessage, setEarnedMedalMessage] = useState(true)
-  const audioRef = useRef(null);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
+
+  const navigate = useNavigate();
 
   // let timeInMilliseconds = timer * 60 * 1000;
   let timeInSeconds = timer * 60;
   let seconds = timeInSeconds - timer * 60;
-
-
 
   useEffect(() => {
     let brushingTimer: string | number | NodeJS.Timeout | undefined;
@@ -32,12 +34,12 @@ function BrushingTimer() {
       brushingTimer = setTimeout(() => {
         setTimeLeft((prevTime) => prevTime - 1); //kollar på tiden i procent och minskar med en.
         setProgress((prev) => {
-          const newProgress = prev + 100 / (timer * 60);
-
+          const newProgress = prev + 100 / (timer * 60)
           return newProgress < 0 ? 0 : newProgress;
         }); //gör en ny progress baserat på tidigare tid(prevTime är värdet av tiden i procent och representerar hur många procent som är kvar i progressbaren) + timer(som börjar på två minuter * 60 (konverterar detta till sekunder (vill konvertera till millisecunder)))
-        setIsPlaying(true);
 
+        //beräkna brogress baserat på hurmycket tid som har gått i förhållande till den totala tiden.
+        setIsPlaying(true);
       }, 1000);
     } else if (isActive && timeLeft === 0) {
       setIsActive(false);
@@ -58,20 +60,29 @@ function BrushingTimer() {
   }
 
   //fuktion som kollar om musiken spelar eller inte (funkar)
-  // function togglePlay(){
-  //   if(isPlaying){
-  //     audioRef.current.pause()
-  //   } else {
-  //     audioRef.current.play()
-  //   }
-  //   setIsPlaying(!isPlaying)
-  // }
+  function togglePlay() {
+    if (audioRef.current) {
+      if (isPlaying) {
+        audioRef.current.pause();
+      } else {
+        audioRef.current.play();
+      }
+      setIsPlaying(!isPlaying);
+    }
+    else {
+      console.error("audioRef.current is null")
+    }
+  }
 
-  function handleButtonClick() {
+  function handleStartBrushing() {
     setIsActive(true);
     setTimeLeft(timeInSeconds);
     setProgressDone(false);
-    // togglePlay()
+    togglePlay();
+  }
+
+  function handleButtonClick() {
+    navigate("/");
   }
 
   async function handleBrushingSession() {
@@ -90,30 +101,29 @@ function BrushingTimer() {
 
   return (
     <>
-    <audio ref={audioRef} src={StarWarsMusic} />
-      {" "}
+      <audio ref={audioRef} src={StarWarsMusic} />{" "}
       {!isActive && !progressDone && (
         <>
           <p>Är du redo? Klicka på knappen för att starta timer</p>
-          <button onClick={handleButtonClick}>Start brushing-timer</button>
+          <button onClick={handleStartBrushing}>Start brushing-timer</button>
         </>
       )}
       {isActive && (
         <>
           <div>
-            {minutes} : {seconds}
+            <h2>
+              {" "}
+              {minutes} : {seconds}{" "}
+            </h2>
           </div>
           <ProgressBar progress={progress}></ProgressBar>
-
+          <DancingAvatar></DancingAvatar>
         </>
       )}
       {!isActive && progressDone && (
         <>
           <div> Du klarade det!</div>
-          <button>
-            {" "}
-            <Link to={"/home"}> Gå till main</Link>
-          </button>
+          <Button onClick={handleButtonClick}>Tillbaka</Button>
         </>
       )}
       {/* {earnedMedalMessage && progressDone && !isActive && (

@@ -1,26 +1,41 @@
 // import { useEffect, useState } from "react";
 import styled from "styled-components";
 
-
 const CircleBackground = styled.svg`
   width: 300px;
   height: 300px;
-  transform: rotate(-420deg);
+  transform: rotate(-450deg);
 `;
 
+const CircleShadow = styled.circle`
+  stroke: grey;
+  stroke-width: 18px;
+  fill: none;
+`;
 
 const CircleProgress = styled.circle`
   fill: none;
-  stroke: #EFE222;
-  /* background-color: #4caf50;
-  width: 75%; */
+  stroke: #efe222;
   stroke-width: 20;
-  /* height: 100%; */
   stroke-linecap: round;
-  transition: stroke-dashoffset 0.5s ease;
+   transition: stroke-dashoffset 1.5s ease-in-out;
+  /* stroke-dasharray: 100;
+  stroke-dashoffset: 100; */
+  /* animation: progressAnimation  2.5s  ease-in-out forwards;
+
+  /*transform-origin: center; */
+   /* @keyframes progressAnimation {
+    0% {
+      stroke-dashoffset: 100;
+    }
+    80% {
+      stroke-dashoffset: 0;
+    }
+    100% {
+      stroke-dashoffset: 0;
+    }
+  } */
 `;
-
-
 
 interface ProgressBarProps {
   progress: number;
@@ -31,12 +46,13 @@ function ProgressBar(props: ProgressBarProps) {
   const circleLength = 2 * Math.PI * radius; //omkretsen på cirkeln (283)
   const totalLength = circleLength - (props.progress / 100) * circleLength; //räknar ut hur mycket av processen som är kvar att fylla i av den totala omkretsen. (porps.progress/ 100) omvandlar procenten till decimal.
 
-
-
   return (
     <>
       <div>
         <CircleBackground>
+          <CircleShadow cx="150" cy="150" r={radius}>
+            {" "}
+          </CircleShadow>
           <CircleProgress
             cx="150"
             cy="150"
