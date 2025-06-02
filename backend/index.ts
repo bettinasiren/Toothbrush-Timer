@@ -20,26 +20,6 @@ interface MyRequest extends Request {
   };
 }
 
-// declare global {
-//   namespace express {
-//     export interface Request {
-//       user: {
-//         user_id: number;
-//       };
-//     }
-//   }
-// }
-
-// interface Request  {
-//   headers: any;
-//   body: any;
-//   query: any;
-//   cookies: any;
-//   user?: {
-//     user_id: number;
-//   };
-// }
-
 interface UserType {
   username: string;
   password: string;
@@ -106,6 +86,7 @@ async function authenticate(
   next();
 }
 
+// hämta token
 app.get("/token/:token", async (request, response) => {
   const token = request.params.token;
 

@@ -53,6 +53,7 @@ function authenticate(request, response, next) {
         next();
     });
 }
+// hämta token
 app.get("/token/:token", (request, response) => __awaiter(void 0, void 0, void 0, function* () {
     const token = request.params.token;
     const { rows: userId } = yield client.query("SELECT user_id FROM tokens WHERE token=$1", [token]);

@@ -29,25 +29,6 @@ CREATE TABLE
     CONSTRAINT fk_avatar FOREIGN KEY (avatar_id) REFERENCES avatars (id)
   );
 
--- CREATE TABLE
---   medals (
---     id SERIAL PRIMARY KEY,
---     medal_name TEXT NOT NULL,
---     medal_image TEXT NOT NULL,
---     criteria TEXT NOT NULL,
---     user_id INT,
---     CONSTRAINT fk_users FOREIGN KEY (user_id) REFERENCES users (id)
---   );
-
--- CREATE TABLE
---   user_medals (
---     id SERIAL PRIMARY KEY,
---     user_id INT,
---     medal_id INT,
---     CONSTRAINT fk_users FOREIGN KEY (user_id) REFERENCES users (id),
---     CONSTRAINT fk_medals FOREIGN KEY (medal_id) REFERENCES medals (id)
---   );
-
 CREATE TABLE
   brushing_tracker (
     id SERIAL PRIMARY KEY,
