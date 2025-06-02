@@ -7,7 +7,7 @@ function ShowUser() {
   return (
     <>
       <Container>
-        <p>{userName}</p>
+        <p>Hej {userName} !</p>
         {userAvatarImg && <img src={userAvatarImg} alt="avatar" />}
       </Container>
     </>

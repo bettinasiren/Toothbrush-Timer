@@ -1,5 +1,4 @@
 import { createBrowserRouter } from "react-router-dom";
-// import Home from "./pages/Home";
 import CreateAccount from "./pages/CreateAccount";
 import Layout from "./components/Layout";
 import BrushingPage from "./pages/BrushingPage";
@@ -16,7 +15,6 @@ const routes = createBrowserRouter([
       {
         element: <PrivateRoutes />,
         children: [
-          // { element: <Home />, path: "/home/" },
           { element: <BrushingPage />, path: "/brushing-page" },
         ],
       },

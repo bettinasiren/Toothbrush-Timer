@@ -1,32 +1,25 @@
 import { useEffect, useRef, useState } from "react";
-import ProgressBar from "./ProgressBar";
-import confetti from "canvas-confetti";
-import { useNavigate } from "react-router-dom";
+import { Container, Button} from "react-bootstrap";
 import { useAuth } from "../context/UserContext";
 import { StarWarsMusic } from "../assets/music";
+import BrushingInfoText from "./BrushingInfoText";
 import DancingAvatar from "./DancingAvatar";
-import Button from "react-bootstrap/Button";
+import ProgressBar from "./ProgressBar";
+import confetti from "canvas-confetti";
 
-// interface BrushingSessionType {
-//   user_id: number;
-// }
 
 function BrushingTimer() {
   const { userId } = useAuth();
-  const [timer, _setTimer] = useState(0.1);
+  const [timerInMinutes, _setTimerInMinutes] = useState(0.1);
   const [isActive, setIsActive] = useState(false);
   const [timeLeft, setTimeLeft] = useState(0.1);
   const [progressDone, setProgressDone] = useState(false);
   const [progress, setProgress] = useState(0); //börjar på 0 %
-  // const [earnedMedalMessage, setEarnedMedalMessage] = useState(true)
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
 
-  const navigate = useNavigate();
-
-  // let timeInMilliseconds = timer * 60 * 1000;
-  let timeInSeconds = timer * 60;
-  let seconds = timeInSeconds - timer * 60;
+  let timeInSeconds = timerInMinutes * 60;
+  let seconds = 0;
 
   useEffect(() => {
     let brushingTimer: string | number | NodeJS.Timeout | undefined;
@@ -34,19 +27,22 @@ function BrushingTimer() {
       brushingTimer = setTimeout(() => {
         setTimeLeft((prevTime) => prevTime - 1); //kollar på tiden i procent och minskar med en.
         setProgress((prev) => {
-          const newProgress = prev + 100 / (timer * 60)
+          const newProgress = prev + 100 / (timerInMinutes * 60);
+          console.log(newProgress);
           return newProgress < 0 ? 0 : newProgress;
-        }); //gör en ny progress baserat på tidigare tid(prevTime är värdet av tiden i procent och representerar hur många procent som är kvar i progressbaren) + timer(som börjar på två minuter * 60 (konverterar detta till sekunder (vill konvertera till millisecunder)))
-
-        //beräkna brogress baserat på hurmycket tid som har gått i förhållande till den totala tiden.
+        });
         setIsPlaying(true);
       }, 1000);
     } else if (isActive && timeLeft === 0) {
-      setIsActive(false);
-      setProgressDone(true);
-      confetti();
-      setProgress(0);
-      handleBrushingSession();
+      setProgress(100);
+
+      setTimeout(() => {
+        setIsActive(false);
+        setProgressDone(true);
+        confetti();
+        setProgress(0);
+        handleBrushingSession();
+      }, 1000);
     }
 
     return () => clearTimeout(brushingTimer);
@@ -54,10 +50,6 @@ function BrushingTimer() {
 
   let minutes = Math.floor(timeLeft / 60);
   seconds = timeLeft - minutes * 60;
-
-  if (seconds < 10) {
-    seconds = 0 + seconds;
-  }
 
   //fuktion som kollar om musiken spelar eller inte (funkar)
   function togglePlay() {
@@ -68,9 +60,8 @@ function BrushingTimer() {
         audioRef.current.play();
       }
       setIsPlaying(!isPlaying);
-    }
-    else {
-      console.error("audioRef.current is null")
+    } else {
+      console.error("audioRef.current is null");
     }
   }
 
@@ -79,10 +70,6 @@ function BrushingTimer() {
     setTimeLeft(timeInSeconds);
     setProgressDone(false);
     togglePlay();
-  }
-
-  function handleButtonClick() {
-    navigate("/");
   }
 
   async function handleBrushingSession() {
@@ -103,17 +90,17 @@ function BrushingTimer() {
     <>
       <audio ref={audioRef} src={StarWarsMusic} />{" "}
       {!isActive && !progressDone && (
-        <>
-          <p>Är du redo? Klicka på knappen för att starta timer</p>
-          <button onClick={handleStartBrushing}>Start brushing-timer</button>
-        </>
+        <Container className="p-3 mb-2 mt-2 bg-dark transparent text-white">
+          <BrushingInfoText />
+          <Button onClick={handleStartBrushing}>Börja borsta!</Button>
+        </Container>
       )}
       {isActive && (
         <>
           <div>
             <h2>
               {" "}
-              {minutes} : {seconds}{" "}
+              {minutes} : {seconds < 10 ? "0" + seconds : seconds}{" "}
             </h2>
           </div>
           <ProgressBar progress={progress}></ProgressBar>
@@ -121,14 +108,10 @@ function BrushingTimer() {
         </>
       )}
       {!isActive && progressDone && (
-        <>
-          <div> Du klarade det!</div>
-          <Button onClick={handleButtonClick}>Tillbaka</Button>
-        </>
+        <Container className="p-3 mb-2 mt-2 ">
+          <h2> Snyggt borstat!</h2>
+        </Container>
       )}
-      {/* {earnedMedalMessage && progressDone && !isActive && (
-        <div>du har {earnedMedals} medaljer</div>
-      )} */}
     </>
   );
 }

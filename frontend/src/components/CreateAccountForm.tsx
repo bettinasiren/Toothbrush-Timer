@@ -118,9 +118,6 @@ function CreateAccountForm() {
                 value={email}
                 onChange={(event) => setEmail(event.target.value)}
               />
-              <Form.Text className="text-muted">
-                Din mejladress kommer inte delas med någon annan
-              </Form.Text>
             </Form.Group>
             <Form.Group className="mb-3" controlId="formBasicPassword">
               <Form.Label> Ange ett lösenord</Form.Label>
@@ -131,7 +128,7 @@ function CreateAccountForm() {
                 value={password}
                 onChange={(event) => setPassword(event.target.value)}
               />
-              <Form.Text className="text-muted">
+              <Form.Text style={{ color: '#ffffff' }}>
                 Lösenordet måste vara minst 6 tecken långt
               </Form.Text>
             </Form.Group>

@@ -1,4 +1,3 @@
-// import Avatars from "../components/Avatars";
 import CreateAccountForm from "../components/CreateAccountForm";
 // import UserCreatedMessage from "../components/UserCreatedMessage";
 

@@ -1,9 +1,9 @@
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import ScoreboardComponent from "./ScoreboardComponent";
 import ShowUser from "./ShowUser";
-// import Dashboard from "../components/Dashboard";
 import { useAuth } from "../context/UserContext";
 import Button from "react-bootstrap/Button";
+import { Container, Row } from "react-bootstrap";
 
 function Home() {
   const { userId, setUserId, setIsLoggedIn } = useAuth();
@@ -34,18 +34,26 @@ function Home() {
     });
   }
 
+  function onGetReady() {
+    navigate("/brushing-page");
+  }
   return (
-    <>
-      Home
-      <ScoreboardComponent />
-      <Button>
-        {" "}
-        <Link to={"/brushing-page"}>Börja spela</Link>
-      </Button>
-      <ShowUser />
-      <Button onClick={logOut}>Logout</Button>
-      <i className="fa fa-gear"></i>
-    </>
+    <Container>
+      <Row>
+        <ScoreboardComponent />
+      </Row>
+      <Row className="m-3 mb-5">
+        <Button onClick={onGetReady}>Gå till spelet</Button>
+      </Row>
+      <Row className="m-3 mb-5">
+        <ShowUser />
+      </Row>
+      <Row>
+        <Button onClick={logOut}>
+          <i className="bi bi-box-arrow-left"></i> Logga ut
+        </Button>
+      </Row>
+    </Container>
   );
 }
 export default Home;

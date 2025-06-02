@@ -14,7 +14,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const cors_1 = __importDefault(require("cors"));
 const express_1 = __importDefault(require("express"));
-// import * as express from 'express';
 const dotenv_1 = __importDefault(require("dotenv"));
 const pg_1 = require("pg");
 const uuid_1 = require("uuid");
@@ -34,11 +33,7 @@ app.use((0, cookie_parser_1.default)());
 //egen middleware för authentification
 function authenticate(request, response, next) {
     return __awaiter(this, void 0, void 0, function* () {
-        const token = 
-        // (request.query && request.query.token) ||
-        // (request.body && request.body.token) ||
-        // (request.headers && request.headers["authorization"]) ||
-        (request.cookies && request.cookies.tbtimer_token);
+        const token = request.cookies && request.cookies.tbtimer_token;
         console.log("token received:", token);
         if (!token) {
             response.status(401).send("finns ingen token");
@@ -66,9 +61,8 @@ app.get("/token/:token", (request, response) => __awaiter(void 0, void 0, void 0
     }
     response.status(200).send(userId[0]);
 }));
-// app.use("/",userRoutes)
 //--------------------Skapa och Visa---------------------
-// skapa user
+// skapa användare
 app.post("/user", (request, response) => __awaiter(void 0, void 0, void 0, function* () {
     const { username, password, email, selectedAvatar } = request.body;
     console.log(request.body);
@@ -88,13 +82,9 @@ app.post("/user", (request, response) => __awaiter(void 0, void 0, void 0, funct
 //hämta alla användare
 app.get("/user", (_request, response) => __awaiter(void 0, void 0, void 0, function* () {
     const { rows: users } = yield client.query("SELECT * FROM users");
-    // const user = await client.query(
-    //   "SELECT * FROM users INNER JOIN avatars ON users.avatar_id = avatar.id WHERE users.id = $1",
-    //   [id]
-    // );
     response.send(users);
 }));
-// hämta user (baserat på id)
+// hämta användare (baserat på id)
 app.get("/user/:id", (request, response) => __awaiter(void 0, void 0, void 0, function* () {
     const id = request.params.id;
     const { rows: user } = yield client.query("SELECT * FROM users WHERE id=$1", [
@@ -102,24 +92,14 @@ app.get("/user/:id", (request, response) => __awaiter(void 0, void 0, void 0, fu
     ]);
     if (user.length === 0)
         response.status(404).send();
-    // const user = await client.query(
-    //   "SELECT * FROM users INNER JOIN avatars ON users.avatar_id = avatar.id WHERE users.id = $1",
-    //   [id]
-    // );
-    console.log(user);
     response.send(user[0]);
 }));
-//hämta user baserat på email
+//OBS! används ejhämta user baserat på email
 app.get("/user/email/:email", (request, response) => __awaiter(void 0, void 0, void 0, function* () {
     const email = request.params.email;
     const { rows: user } = yield client.query("SELECT * FROM users WHERE email=$1", [email]);
     if (user.length === 0)
         response.status(404).send();
-    console.log(user);
-    // const user = await client.query(
-    //   "SELECT * FROM users INNER JOIN avatars ON users.avatar_id = avatar.id WHERE users.id = $1",
-    //   [id]
-    // );
     response.send(user[0]);
 }));
 //login
@@ -160,19 +140,18 @@ app.get("/avatars", (_request, response) => __awaiter(void 0, void 0, void 0, fu
     const { rows: avatar } = yield client.query("SELECT * FROM avatars");
     response.send(avatar);
 }));
-//hämta specifik avatar
+//hämta specifik avatar kopplat till användaren
 app.get("/avatars/:id", (request, response) => __awaiter(void 0, void 0, void 0, function* () {
     const avatarId = request.params.id;
     const { rows: avatar } = yield client.query("SELECT avatar FROM avatars WHERE id=$1", [avatarId]);
     response.send(avatar[0]);
 }));
-//Välj avatar till din användare genom att uppdatera users-tabellen
+// OBS används ej! Välj avatar till din användare genom att uppdatera users-tabellen
 app.post("/user/avatar", (request, response) => __awaiter(void 0, void 0, void 0, function* () {
     const { userId, avatarId } = request.query;
     const myAvatar = yield client.query("UPDATE users SET avatar_id = $1 WHERE id = $2", [avatarId, userId]);
     response.send(myAvatar);
 }));
-//----------------Logga in---------------------------
 //---------------------------------------------------
 //     Spel, borsta tänderna, får medalj
 //---------------------------------------------------
@@ -184,59 +163,14 @@ app.post("/brushing/:id", (request, response) => __awaiter(void 0, void 0, void 
         response.status(500).send("Kunde inte lägga in i databasen");
     }
     const { rows: brushingSessionUser } = yield client.query("SELECT * FROM brushing_tracker WHERE user_id=$1", [userId]);
-    // const earnedMedal = Math.floor(brushingSession.length / 5);
-    //   const newMedal = await client.query(
-    //   "INSERT INTO user_medals (user_id, medal_id) VALUES ($1, $2)",
-    //   [userId, earnedMedal]
-    // );
     response.send(brushingSessionUser);
 }));
-//hämta alla tandborsts-sessioner per användare och delar med 5 för att få fram hur många medaljer användaren ska ha (antalet avklkarade tandborstsessioner som en användare har klarat)
+//hämta alla tandborsts-sessioner per användare
 app.get("/brushingmedals/:id", (request, response) => __awaiter(void 0, void 0, void 0, function* () {
     const userId = request.params.id;
     const { rows: brushingSession } = yield client.query("SELECT * FROM brushing_tracker WHERE user_id=$1", [userId]);
-    // const earnedMedal = Math.floor(brushingSession.length / 5);
-    // const newMedal = await client.query(
-    //   "INSERT INTO user_medals (user_id, medal_id) VALUES ($1, $2)",
-    //   [userId, earnedMedal]
-    // );
-    // console.log(brushingSession.length);
-    // console.log(earnedMedal);
-    // console.log(newMedal);
     response.send(brushingSession);
 }));
-// //hämta medaljer
-// app.get("/medals", async (_request, response) => {
-//   const { rows: medals } = await client.query("SELECT * FROM medals");
-//   response.send(medals);
-// });
-// //tilldela ny medalj till användaren
-// app.post("/medals/", async (request, response) => {
-//   const { userId, medalId } = request.query as {
-//     userId: string;
-//     medalId: string;
-//   };
-// kolla om medaljen redan är tilldelad till användaren
-// const { rows: userMedals } = await client.query("SELECT * FROM user_medals WHERE user_id = $1 AND medal_id = $2,", [userId, medalId]);
-// if(userMedals.length === 0){
-//    return response.send("du har redan denna medalj")
-// }
-//   //annars tilldela ny medalj
-//   const { rows: newMedal } = await client.query(
-//     "INSERT INTO user_medals (user_id, medal_id) VALUES ($1, $2)",
-//     [userId, medalId]
-//   );
-//   response.send(newMedal);
-// });
-// //hämta  medaljer för en specifik användare
-// app.get("/medals/:userId", async (request, response) => {
-//   const id = request.params.userId;
-//   const { rows: medals } = await client.query(
-//     "SELECT * FROM user_medals WHERE user_id=$1",
-//     [id]
-//   );
-//   response.send(medals);
-// });
 const StartServer = () => __awaiter(void 0, void 0, void 0, function* () {
     yield client.connect();
     app.listen(port, () => {

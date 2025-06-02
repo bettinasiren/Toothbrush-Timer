@@ -2,7 +2,6 @@ import { useAuth } from "../context/UserContext";
 import { diamondImage, medalImage, starImage } from "../assets/images";
 import { useEffect, useState } from "react";
 import styled from "styled-components";
-// import { useState } from "react";
 
 interface MedalType {
   id: number;
@@ -31,7 +30,7 @@ const PrizeImage = styled.img`
 `;
 
 function ScoreboardComponent() {
-  const { userId } = useAuth();
+  const { userId, isLoading } = useAuth();
   const [earnedMedals, setEarnedMedals] = useState<number>(0);
   const [medals, setMedals] = useState<MedalType[]>([]);
   const [stars, setStars] = useState<MedalType[]>([]);
@@ -42,7 +41,7 @@ function ScoreboardComponent() {
     const newMedals = [];
     const newStars = [];
     const newDiamonds = [];
-    //skapar en array som heter images med antalet tilldelade medaljer och villkor för vilka medaljer man har uppnåt
+
     for (let i = 0; i < earnedMedals; i++) {
       if (i < 5) {
         newMedals.push({ id: i, image: medalImage });
@@ -52,7 +51,6 @@ function ScoreboardComponent() {
         newDiamonds.push({ id: i - 11, image: diamondImage });
       }
     }
-
     setMedals(newMedals);
     setStars(newStars);
     setDiamonds(newDiamonds);
@@ -73,17 +71,14 @@ function ScoreboardComponent() {
     }
   }, [userId]);
 
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
+
   return (
     <>
-      Här ska medaljerna visas
-      {earnedMedals === 0 && (
-        <div>
-          <MedalScoreBoard></MedalScoreBoard>
-        </div>
-      )}
       {earnedMedals <= 5 && (
         <ScoreBoardWrapper>
-          <p>Du har {earnedMedals} st medaljer </p>
           <MedalScoreBoard>
             {" "}
             {medals.map((medal) => (
@@ -95,7 +90,6 @@ function ScoreboardComponent() {
       {earnedMedals >= 6 && earnedMedals < 11 && (
         <>
           <ScoreBoardWrapper>
-            <p>Du har {earnedMedals} st medaljer </p>
             <MedalScoreBoard>
               {" "}
               {stars.map((star) => (
@@ -107,7 +101,6 @@ function ScoreboardComponent() {
       )}
       {earnedMedals >= 11 && (
         <ScoreBoardWrapper>
-          <p>Du har {earnedMedals} st medaljer </p>
           <MedalScoreBoard>
             {" "}
             {diamonds.map((diamond) => (

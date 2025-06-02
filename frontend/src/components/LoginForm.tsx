@@ -1,10 +1,15 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/UserContext";
-import { useNavigate } from "react-router-dom";
-import Form from "react-bootstrap/Form";
-import Button from "react-bootstrap/Button";
-import { Container } from "react-bootstrap";
+import { Container, Button, Form } from "react-bootstrap";
+import { StarBrushLogo } from "../assets/images";
+import styled from "styled-components";
+
+const LogoImg = styled.img`
+width: 200px;
+border-radius: 1rem;
+margin-bottom: 20px;
+`
 
 function LoginForm() {
   const { setIsLoggedIn, isLoading } = useAuth();
@@ -38,14 +43,16 @@ function LoginForm() {
     });
   }
 
-    if(isLoading){
-    return <div>Loading...</div>
+  if (isLoading) {
+    return <div>Loading...</div>;
   }
 
   return (
     <>
+      <LogoImg src={StarBrushLogo} alt="Logo" />
+      <h1>Brush Wars</h1>
       <Form onSubmit={handleSubmit}>
-        <Form.Group className="mb-3" controlId="formBasicEmail">
+        <Form.Group className="mb-3" controlId="formBasicEmail" >
           <legend>
             <h3>Logga in för att börja borsta</h3>
           </legend>
@@ -57,11 +64,8 @@ function LoginForm() {
             value={email}
             onChange={(event) => setEmail(event.target.value)}
           />
-          {/* <Form.Text className="text-muted">
-            <p>Din mejladress kommer inte delas med någon annan</p>
-          </Form.Text> */}
         </Form.Group>
-        <Form.Group className="mb-3" controlId="formBasicPassword">
+        <Form.Group className="mb-3" controlId="formBasicPassword" >
           <Form.Label> Lösenord</Form.Label>
           <Form.Control
             name="password"
@@ -73,8 +77,8 @@ function LoginForm() {
         </Form.Group>
         <Button type="submit">Logga in</Button>
       </Form>
-      <Container className="md-3">
-          <Link to="/create-account">Har du inget konto, skapa ett här</Link>
+      <Container className="p-3">
+        <Link to="/create-account">Har du inget konto, skapa ett här</Link>
       </Container>
     </>
   );

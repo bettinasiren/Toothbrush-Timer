@@ -33,7 +33,7 @@ const UserContextProvider: React.FC<{ children: ReactNode }> = ({
   const [userAvatarId, setUserAvatarId] = useState<number | null>(null);
   const [userAvatarImg, setUserAvatarImg] = useState("");
 
-  // kolla rpå inloggat läge och sätter cookie
+  // kollar på inloggat läge och sätter cookie
   useEffect(() => {
     console.log("HALLÅ");
     const cookie = document.cookie
@@ -63,6 +63,7 @@ const UserContextProvider: React.FC<{ children: ReactNode }> = ({
       setUserName("");
     }
   }, [userId]);
+
   //hämtar den avatar som användaren har
   useEffect(() => {
     if (userAvatarId) {
