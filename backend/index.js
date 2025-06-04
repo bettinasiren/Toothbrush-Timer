@@ -28,7 +28,8 @@ const client = new pg_1.Client({
 app.use(express_1.default.static(path_1.default.join(path_1.default.resolve(), "dist")));
 //har kvar denna för att kunna publicera på github-pages och egen server i framtiden
 app.use((0, cors_1.default)({
-    origin: "http://localhost:5173",
+    // origin: "http://localhost:5173",
+    origin: "https://toothbrush-timer.onrender.com",
     credentials: true,
 }));
 app.use(express_1.default.json());

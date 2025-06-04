@@ -53,7 +53,8 @@ app.use(express.static(path.join(path.resolve(), "dist")))
 //har kvar denna för att kunna publicera på github-pages och egen server i framtiden
 app.use(
   cors({
-    origin: "http://localhost:5173",
+    // origin: "http://localhost:5173",
+    origin: "https://toothbrush-timer.onrender.com",
     credentials: true,
   })
 );
