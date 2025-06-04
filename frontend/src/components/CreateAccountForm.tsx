@@ -43,7 +43,7 @@ function CreateAccountForm() {
   }, []);
 
   function getAvatars() {
-    fetch("http://localhost:3000/avatars")
+    fetch("/avatars")
       .then((res) => res.json())
       .then((data) => {
         console.log(data);
