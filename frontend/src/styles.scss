@@ -1,0 +1,24 @@
+// $primary-color: #007bff;
+
+
+$primary-color: rgb(15, 14, 14);
+
+body {
+  font-family: Arial, sans-serif;
+  // background-color: #f8f9fa;
+
+  // h1 {
+  //   color: $primary-color;
+  // }
+
+  .btn-custom {
+    background-color: $primary-color;
+    color: white;
+    border: 2px solid transparent; // Standard border
+    transition: border 0.3s;
+
+    &:hover {
+      border: 2px solid #efe222;
+    }
+  }
+}

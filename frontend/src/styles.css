@@ -1,0 +1,12 @@
+body {
+  font-family: Arial, sans-serif;
+}
+body .btn-custom {
+  background-color: rgb(15, 14, 14);
+  color: white;
+  border: 2px solid transparent;
+  transition: border 0.3s;
+}
+body .btn-custom:hover {
+  border: 2px solid #efe222;
+}/*# sourceMappingURL=styles.css.map */
