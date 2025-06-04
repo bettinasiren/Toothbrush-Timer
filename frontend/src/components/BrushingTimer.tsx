@@ -1,12 +1,11 @@
 import { useEffect, useRef, useState } from "react";
-import { Container, Button} from "react-bootstrap";
+import { Container, Button } from "react-bootstrap";
 import { useAuth } from "../context/UserContext";
 import { StarWarsMusic } from "../assets/music";
 import BrushingInfoText from "./BrushingInfoText";
 import DancingAvatar from "./DancingAvatar";
 import ProgressBar from "./ProgressBar";
 import confetti from "canvas-confetti";
-
 
 function BrushingTimer() {
   const { userId } = useAuth();
@@ -51,7 +50,7 @@ function BrushingTimer() {
   let minutes = Math.floor(timeLeft / 60);
   seconds = timeLeft - minutes * 60;
 
-  //fuktion som kollar om musiken spelar eller inte (funkar)
+  //fuktion som kollar om musiken spelar eller inte
   function togglePlay() {
     if (audioRef.current) {
       if (isPlaying) {
@@ -73,7 +72,7 @@ function BrushingTimer() {
   }
 
   async function handleBrushingSession() {
-    await fetch(`http://localhost:3000/brushing/${userId}`, {
+    await fetch(`/brushing/${userId}`, {
       method: "POST",
       headers: {
         Accept: "application/json",
@@ -97,14 +96,11 @@ function BrushingTimer() {
       )}
       {isActive && (
         <>
-          <div>
-            <h2>
-              {" "}
-              {minutes} : {seconds < 10 ? "0" + seconds : seconds}{" "}
-            </h2>
-          </div>
-          <ProgressBar progress={progress}></ProgressBar>
-          <DancingAvatar></DancingAvatar>
+          <h2>
+            {minutes} : {seconds < 10 ? "0" + seconds : seconds}{" "}
+          </h2>
+          <ProgressBar progress={progress} />
+          <DancingAvatar />
         </>
       )}
       {!isActive && progressDone && (

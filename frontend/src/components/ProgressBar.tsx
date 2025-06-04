@@ -30,20 +30,18 @@ function ProgressBar(props: ProgressBarProps) {
   const totalLength = circleLength - (props.progress / 100) * circleLength;
 
   return (
-    <>
-      <CircleBackground>
-        <CircleShadow cx="150" cy="150" r={radius}>
-          {" "}
-        </CircleShadow>
-        <CircleProgress
-          cx="150"
-          cy="150"
-          r={radius}
-          strokeDasharray={circleLength}
-          strokeDashoffset={totalLength}
-        />
-      </CircleBackground>
-    </>
+    <CircleBackground>
+      <CircleShadow cx="150" cy="150" r={radius}>
+        {" "}
+      </CircleShadow>
+      <CircleProgress
+        cx="150"
+        cy="150"
+        r={radius}
+        strokeDasharray={circleLength}
+        strokeDashoffset={totalLength}
+      />
+    </CircleBackground>
   );
 }
 export default ProgressBar;

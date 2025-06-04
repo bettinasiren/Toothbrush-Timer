@@ -14,23 +14,26 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const cors_1 = __importDefault(require("cors"));
 const express_1 = __importDefault(require("express"));
+const path_1 = __importDefault(require("path"));
 const dotenv_1 = __importDefault(require("dotenv"));
 const pg_1 = require("pg");
 const uuid_1 = require("uuid");
 const cookie_parser_1 = __importDefault(require("cookie-parser"));
-const port = 3000;
+const port = process.env.PORT || 3000;
 const app = (0, express_1.default)();
 dotenv_1.default.config();
 const client = new pg_1.Client({
     connectionString: process.env.PGURI,
 });
+app.use(express_1.default.static(path_1.default.join(path_1.default.resolve(), "dist")));
+//har kvar denna för att kunna publicera på github-pages och egen server i framtiden
 app.use((0, cors_1.default)({
     origin: "http://localhost:5173",
     credentials: true,
 }));
 app.use(express_1.default.json());
 app.use((0, cookie_parser_1.default)());
-//egen middleware för authentification
+// middleware för autenfificering
 function authenticate(request, response, next) {
     return __awaiter(this, void 0, void 0, function* () {
         const token = request.cookies && request.cookies.tbtimer_token;
@@ -53,7 +56,8 @@ function authenticate(request, response, next) {
         next();
     });
 }
-// hämta token
+//--------------------Logga in, Logga ut------------
+// hämta token skicka id
 app.get("/token/:token", (request, response) => __awaiter(void 0, void 0, void 0, function* () {
     const token = request.params.token;
     const { rows: userId } = yield client.query("SELECT user_id FROM tokens WHERE token=$1", [token]);
@@ -61,47 +65,6 @@ app.get("/token/:token", (request, response) => __awaiter(void 0, void 0, void 0
         response.status(404).send("userId finns ej");
     }
     response.status(200).send(userId[0]);
-}));
-//--------------------Skapa och Visa---------------------
-// skapa användare
-app.post("/user", (request, response) => __awaiter(void 0, void 0, void 0, function* () {
-    const { username, password, email, selectedAvatar } = request.body;
-    console.log(request.body);
-    try {
-        const { rows: avatars } = yield client.query("SELECT * FROM avatars WHERE id = $1", [selectedAvatar]);
-        if (avatars.length === 0) {
-            response.status(400).send("No avatar exists");
-        }
-        const { rows: user } = yield client.query("INSERT INTO users (username, password, email, avatar_id) VALUES ($1, $2, $3, $4) RETURNING *", [username, password, email, selectedAvatar]);
-        response.status(201).send(user[0]);
-    }
-    catch (error) {
-        console.error("Error creating user", error);
-        response.status(500).send({ error: "Error while creating a new user" });
-    }
-}));
-//hämta alla användare
-app.get("/user", (_request, response) => __awaiter(void 0, void 0, void 0, function* () {
-    const { rows: users } = yield client.query("SELECT * FROM users");
-    response.send(users);
-}));
-// hämta användare (baserat på id)
-app.get("/user/:id", (request, response) => __awaiter(void 0, void 0, void 0, function* () {
-    const id = request.params.id;
-    const { rows: user } = yield client.query("SELECT * FROM users WHERE id=$1", [
-        id,
-    ]);
-    if (user.length === 0)
-        response.status(404).send();
-    response.send(user[0]);
-}));
-//OBS! används ejhämta user baserat på email
-app.get("/user/email/:email", (request, response) => __awaiter(void 0, void 0, void 0, function* () {
-    const email = request.params.email;
-    const { rows: user } = yield client.query("SELECT * FROM users WHERE email=$1", [email]);
-    if (user.length === 0)
-        response.status(404).send();
-    response.send(user[0]);
 }));
 //login
 app.post("/login", (request, response) => __awaiter(void 0, void 0, void 0, function* () {
@@ -118,7 +81,6 @@ app.post("/login", (request, response) => __awaiter(void 0, void 0, void 0, func
             token,
         ]);
         response.setHeader("Set-Cookie", `tbtimer_token=${token}; Path=/;`);
-        // console.log(request.cookies.token)
         response.status(201).send(request.cookies.token);
     }
     catch (error) {
@@ -136,6 +98,34 @@ app.post("/logout", authenticate, (request, response) => __awaiter(void 0, void 
     response.clearCookie("tbtimer_token");
     response.status(200).send();
 }));
+//--------------------Användare---------------------
+// skapa användare
+app.post("/user", (request, response) => __awaiter(void 0, void 0, void 0, function* () {
+    const { username, password, email, selectedAvatar } = request.body;
+    console.log(request.body);
+    try {
+        const { rows: avatars } = yield client.query("SELECT * FROM avatars WHERE id = $1", [selectedAvatar]);
+        if (avatars.length === 0) {
+            response.status(400).send("No avatar exists");
+        }
+        const { rows: user } = yield client.query("INSERT INTO users (username, password, email, avatar_id) VALUES ($1, $2, $3, $4) RETURNING *", [username, password, email, selectedAvatar]);
+        response.status(201).send(user[0]);
+    }
+    catch (error) {
+        console.error("Error creating user", error);
+        response.status(500).send({ error: "Error while creating a new user" });
+    }
+}));
+// hämta användare (baserat på id)
+app.get("/user/:id", (request, response) => __awaiter(void 0, void 0, void 0, function* () {
+    const id = request.params.id;
+    const { rows: user } = yield client.query("SELECT * FROM users WHERE id=$1", [
+        id,
+    ]);
+    if (user.length === 0)
+        response.status(404).send();
+    response.send(user[0]);
+}));
 // hämta alla avatarer
 app.get("/avatars", (_request, response) => __awaiter(void 0, void 0, void 0, function* () {
     const { rows: avatar } = yield client.query("SELECT * FROM avatars");
@@ -147,15 +137,7 @@ app.get("/avatars/:id", (request, response) => __awaiter(void 0, void 0, void 0,
     const { rows: avatar } = yield client.query("SELECT avatar FROM avatars WHERE id=$1", [avatarId]);
     response.send(avatar[0]);
 }));
-// OBS används ej! Välj avatar till din användare genom att uppdatera users-tabellen
-app.post("/user/avatar", (request, response) => __awaiter(void 0, void 0, void 0, function* () {
-    const { userId, avatarId } = request.query;
-    const myAvatar = yield client.query("UPDATE users SET avatar_id = $1 WHERE id = $2", [avatarId, userId]);
-    response.send(myAvatar);
-}));
-//---------------------------------------------------
-//     Spel, borsta tänderna, får medalj
-//---------------------------------------------------
+//-----------------Borsta tänderna-------------------
 // lägg till ett värde för varje gång man har borstat tänderna
 app.post("/brushing/:id", (request, response) => __awaiter(void 0, void 0, void 0, function* () {
     const userId = request.params.id;
@@ -167,7 +149,7 @@ app.post("/brushing/:id", (request, response) => __awaiter(void 0, void 0, void 
     response.send(brushingSessionUser);
 }));
 //hämta alla tandborsts-sessioner per användare
-app.get("/brushingmedals/:id", (request, response) => __awaiter(void 0, void 0, void 0, function* () {
+app.get("/brushing-sessions/:id", (request, response) => __awaiter(void 0, void 0, void 0, function* () {
     const userId = request.params.id;
     const { rows: brushingSession } = yield client.query("SELECT * FROM brushing_tracker WHERE user_id=$1", [userId]);
     response.send(brushingSession);

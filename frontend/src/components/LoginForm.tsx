@@ -6,10 +6,10 @@ import { StarBrushLogo } from "../assets/images";
 import styled from "styled-components";
 
 const LogoImg = styled.img`
-width: 200px;
-border-radius: 1rem;
-margin-bottom: 20px;
-`
+  width: 200px;
+  border-radius: 1rem;
+  margin-bottom: 20px;
+`;
 
 function LoginForm() {
   const { setIsLoggedIn, isLoading } = useAuth();
@@ -20,7 +20,6 @@ function LoginForm() {
 
   async function handleSubmit(event: { preventDefault: () => void }) {
     event.preventDefault();
-    console.log("Email", email);
 
     await fetch("http://localhost:3000/login/", {
       method: "POST",
@@ -36,7 +35,6 @@ function LoginForm() {
     }).then((response) => {
       console.log(response);
       if (response.ok) {
-        console.log("Response was ok");
         setIsLoggedIn(true);
         navigate("/");
       }
@@ -48,11 +46,11 @@ function LoginForm() {
   }
 
   return (
-    <>
+    <Container>
       <LogoImg src={StarBrushLogo} alt="Logo" />
-      <h1>Brush Wars</h1>
+      {/* <h2>Brush Wars</h2> */}
       <Form onSubmit={handleSubmit}>
-        <Form.Group className="mb-3" controlId="formBasicEmail" >
+        <Form.Group className="mb-3" controlId="formBasicEmail">
           <legend>
             <h3>Logga in för att börja borsta</h3>
           </legend>
@@ -65,7 +63,7 @@ function LoginForm() {
             onChange={(event) => setEmail(event.target.value)}
           />
         </Form.Group>
-        <Form.Group className="mb-3" controlId="formBasicPassword" >
+        <Form.Group className="mb-3" controlId="formBasicPassword">
           <Form.Label> Lösenord</Form.Label>
           <Form.Control
             name="password"
@@ -80,7 +78,7 @@ function LoginForm() {
       <Container className="p-3">
         <Link to="/create-account">Har du inget konto, skapa ett här</Link>
       </Container>
-    </>
+    </Container>
   );
 }
 export default LoginForm;

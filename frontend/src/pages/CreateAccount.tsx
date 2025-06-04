@@ -1,12 +1,11 @@
+import { Container } from "react-bootstrap";
 import CreateAccountForm from "../components/CreateAccountForm";
-// import UserCreatedMessage from "../components/UserCreatedMessage";
 
 function CreateAccount() {
   return (
-    <>
-      <CreateAccountForm></CreateAccountForm>
-      {/* <UserCreatedMessage></UserCreatedMessage> */}
-    </>
+    <Container>
+      <CreateAccountForm />
+    </Container>
   );
 }
 export default CreateAccount;

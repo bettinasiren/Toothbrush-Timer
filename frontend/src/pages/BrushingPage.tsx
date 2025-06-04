@@ -1,6 +1,6 @@
 import { Button } from "react-bootstrap";
-import BrushingTimer from "../components/BrushingTimer";
 import { useNavigate } from "react-router-dom";
+import BrushingTimer from "../components/BrushingTimer";
 
 function BrushingPage() {
   const navigate = useNavigate();

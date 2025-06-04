@@ -1,11 +1,12 @@
 import cors from "cors";
 import express, { Request, Response, NextFunction } from "express";
+import path from "path"
 import dotenv from "dotenv";
 import { Client } from "pg";
 import { v4 as uuidv4 } from "uuid";
 import cookieParser from "cookie-parser";
 
-const port = 3000;
+const port = process.env.PORT || 3000;
 const app = express();
 
 dotenv.config();
@@ -47,6 +48,9 @@ interface TokenType {
   token: string;
 }
 
+app.use(express.static(path.join(path.resolve(), "dist")))
+
+//har kvar denna för att kunna publicera på github-pages och egen server i framtiden
 app.use(
   cors({
     origin: "http://localhost:5173",
@@ -56,7 +60,7 @@ app.use(
 app.use(express.json());
 app.use(cookieParser());
 
-//egen middleware för authentification
+// middleware för autenfificering
 async function authenticate(
   request: MyRequest,
   response: Response,
@@ -86,7 +90,10 @@ async function authenticate(
   next();
 }
 
-// hämta token
+
+//--------------------Logga in, Logga ut------------
+
+// hämta token skicka id
 app.get("/token/:token", async (request, response) => {
   const token = request.params.token;
 
@@ -102,7 +109,51 @@ app.get("/token/:token", async (request, response) => {
   response.status(200).send(userId[0]);
 });
 
-//--------------------Skapa och Visa---------------------
+//login
+app.post("/login", async (request, response) => {
+  const { email, password }: UserType = request.body;
+
+  try {
+    const existingUser = await client.query(
+      "SELECT * FROM users WHERE email=$1 AND password=$2",
+      [email, password]
+    );
+
+    if (existingUser.rows.length === 0) {
+      response.status(401).send("Epost eller lösenord finns ej");
+    }
+    const user_id = existingUser.rows[0].id;
+    const token = uuidv4();
+
+    await client.query("INSERT INTO tokens (user_id, token) VALUES($1, $2)", [
+      user_id,
+      token,
+    ]);
+
+    response.setHeader("Set-Cookie", `tbtimer_token=${token}; Path=/;`);
+    response.status(201).send(request.cookies.token);
+  } catch (error) {
+    response.status(500).send("ett fel har inträffat vid inloggningen" + error);
+  }
+});
+
+// logout
+app.post(
+  "/logout",
+  authenticate,
+  async (request: MyRequest, response: Response) => {
+    const user_id = request.user?.user_id;
+    if (!user_id) {
+      response.status(401).send("du är inte inloggad");
+    }
+    await client.query("DELETE FROM tokens WHERE user_id=$1", [user_id]);
+    response.clearCookie("tbtimer_token");
+
+    response.status(200).send();
+  }
+);
+
+//--------------------Användare---------------------
 // skapa användare
 app.post("/user", async (request, response) => {
   const { username, password, email, selectedAvatar }: UserType = request.body;
@@ -129,12 +180,6 @@ app.post("/user", async (request, response) => {
   }
 });
 
-//hämta alla användare
-app.get("/user", async (_request, response) => {
-  const { rows: users } = await client.query("SELECT * FROM users");
-  response.send(users);
-});
-
 // hämta användare (baserat på id)
 app.get("/user/:id", async (request, response) => {
   const id = request.params.id;
@@ -146,64 +191,6 @@ app.get("/user/:id", async (request, response) => {
 
   response.send(user[0]);
 });
-
-//OBS! används ejhämta user baserat på email
-app.get("/user/email/:email", async (request, response) => {
-  const email = request.params.email;
-  const { rows: user } = await client.query(
-    "SELECT * FROM users WHERE email=$1",
-    [email]
-  );
-
-  if (user.length === 0) response.status(404).send();
-
-  response.send(user[0]);
-});
-
-//login
-app.post("/login", async (request, response) => {
-  const { email, password }: UserType = request.body;
-
-  try {
-    const existingUser = await client.query(
-      "SELECT * FROM users WHERE email=$1 AND password=$2",
-      [email, password]
-    );
-
-    if (existingUser.rows.length === 0) {
-      response.status(401).send("Epost eller lösenord finns ej");
-    }
-    const user_id = existingUser.rows[0].id;
-    const token = uuidv4();
-
-    await client.query("INSERT INTO tokens (user_id, token) VALUES($1, $2)", [
-      user_id,
-      token,
-    ]);
-
-    response.setHeader("Set-Cookie", `tbtimer_token=${token}; Path=/;`);
-    // console.log(request.cookies.token)
-    response.status(201).send(request.cookies.token);
-  } catch (error) {
-    response.status(500).send("ett fel har inträffat vid inloggningen" + error);
-  }
-});
-
-// logout
-app.post(
-  "/logout",
-  authenticate,
-  async (request: MyRequest, response: Response) => {
-    const user_id = request.user?.user_id;
-    if (!user_id) {
-      response.status(401).send("du är inte inloggad");
-    }
-    await client.query("DELETE FROM tokens WHERE user_id=$1", [user_id]);
-    response.clearCookie("tbtimer_token");
-
-    response.status(200).send();
-  }
-);
 
 // hämta alla avatarer
 app.get("/avatars", async (_request, response) => {
@@ -221,22 +208,8 @@ app.get("/avatars/:id", async (request, response) => {
   response.send(avatar[0]);
 });
 
-// OBS används ej! Välj avatar till din användare genom att uppdatera users-tabellen
-app.post("/user/avatar", async (request, response) => {
-  const { userId, avatarId } = request.query;
 
-  const myAvatar = await client.query(
-    "UPDATE users SET avatar_id = $1 WHERE id = $2",
-    [avatarId, userId]
-  );
-
-  response.send(myAvatar);
-});
-
-//---------------------------------------------------
-//     Spel, borsta tänderna, får medalj
-//---------------------------------------------------
-
+//-----------------Borsta tänderna-------------------
 // lägg till ett värde för varje gång man har borstat tänderna
 app.post("/brushing/:id", async (request, response) => {
   const userId = request.params.id;
@@ -259,7 +232,7 @@ app.post("/brushing/:id", async (request, response) => {
 });
 
 //hämta alla tandborsts-sessioner per användare
-app.get("/brushingmedals/:id", async (request, response) => {
+app.get("/brushing-sessions/:id", async (request, response) => {
   const userId = request.params.id;
   const { rows: brushingSession } = await client.query(
     "SELECT * FROM brushing_tracker WHERE user_id=$1",

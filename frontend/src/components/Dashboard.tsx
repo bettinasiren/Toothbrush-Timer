@@ -1,9 +1,8 @@
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../context/UserContext";
+import { Container, Row, Button } from "react-bootstrap";
 import ScoreboardComponent from "./ScoreboardComponent";
 import ShowUser from "./ShowUser";
-import { useAuth } from "../context/UserContext";
-import Button from "react-bootstrap/Button";
-import { Container, Row } from "react-bootstrap";
 
 function Home() {
   const { userId, setUserId, setIsLoggedIn } = useAuth();

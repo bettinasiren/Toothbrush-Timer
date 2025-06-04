@@ -2,6 +2,7 @@ import { useAuth } from "../context/UserContext";
 import { diamondImage, medalImage, starImage } from "../assets/images";
 import { useEffect, useState } from "react";
 import styled from "styled-components";
+import { Container } from "react-bootstrap";
 
 interface MedalType {
   id: number;
@@ -57,7 +58,7 @@ function ScoreboardComponent() {
   }, [earnedMedals]);
 
   async function fetchUserMedals() {
-    await fetch(`http://localhost:3000/brushingmedals/${userId}`)
+    await fetch(`http://localhost:3000/brushing-sessions/${userId}`)
       .then((res) => res.json())
       .then((data) => {
         let earnedMedals = Math.floor(data.length / 5);
@@ -76,7 +77,7 @@ function ScoreboardComponent() {
   }
 
   return (
-    <>
+    <Container>
       {earnedMedals <= 5 && (
         <ScoreBoardWrapper>
           <MedalScoreBoard>
@@ -88,16 +89,14 @@ function ScoreboardComponent() {
         </ScoreBoardWrapper>
       )}
       {earnedMedals >= 6 && earnedMedals < 11 && (
-        <>
-          <ScoreBoardWrapper>
-            <MedalScoreBoard>
-              {" "}
-              {stars.map((star) => (
-                <PrizeImage key={star.id} src={star.image} alt="star" />
-              ))}
-            </MedalScoreBoard>
-          </ScoreBoardWrapper>
-        </>
+        <ScoreBoardWrapper>
+          <MedalScoreBoard>
+            {" "}
+            {stars.map((star) => (
+              <PrizeImage key={star.id} src={star.image} alt="star" />
+            ))}
+          </MedalScoreBoard>
+        </ScoreBoardWrapper>
       )}
       {earnedMedals >= 11 && (
         <ScoreBoardWrapper>
@@ -109,7 +108,7 @@ function ScoreboardComponent() {
           </MedalScoreBoard>
         </ScoreBoardWrapper>
       )}
-    </>
+    </Container>
   );
 }
 export default ScoreboardComponent;
