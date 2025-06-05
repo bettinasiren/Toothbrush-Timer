@@ -265,7 +265,9 @@ app.post("/brushing/:id", (request, response) => __awaiter(void 0, void 0, void 
 app.get("/brushing-sessions/:id", (request, response) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const userId = request.params.id;
-        const { rows: brushingSession } = yield client.query("SELECT * FROM brushing_tracker WHERE user_id=$1", [userId]);
+        const { rows: brushingSession } = yield client.query("SELECT * FROM brushing_tracker WHERE user_id=$1", [
+            userId,
+        ]);
         response.send(brushingSession);
     }
     catch (error) {

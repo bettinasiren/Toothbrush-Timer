@@ -368,10 +368,10 @@ app.post("/brushing/:id", async (request, response) => {
 app.get("/brushing-sessions/:id", async (request, response) => {
   try {
     const userId = request.params.id;
-    const { rows: brushingSession } : {rows: BrushingSessionType[]} = await client.query(
-      "SELECT * FROM brushing_tracker WHERE user_id=$1",
-      [userId]
-    );
+    const { rows: brushingSession }: { rows: BrushingSessionType[] } =
+      await client.query("SELECT * FROM brushing_tracker WHERE user_id=$1", [
+        userId,
+      ]);
     response.send(brushingSession);
   } catch (error) {
     if (error instanceof Error) {
