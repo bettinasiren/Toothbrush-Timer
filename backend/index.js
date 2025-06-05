@@ -81,7 +81,7 @@ app.post("/login", (request, response) => __awaiter(void 0, void 0, void 0, func
             user_id,
             token,
         ]);
-        response.setHeader("Set-Cookie", `tbtimer_token=${token}; Path=/;`);
+        response.setHeader("Set-Cookie", `tbtimer_token=${token}; Path=/; Partitioned`);
         response.status(201).send(request.cookies.token);
     }
     catch (error) {

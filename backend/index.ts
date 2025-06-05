@@ -131,7 +131,7 @@ app.post("/login", async (request, response) => {
       token,
     ]);
 
-    response.setHeader("Set-Cookie", `tbtimer_token=${token}; Path=/;`);
+    response.setHeader("Set-Cookie", `tbtimer_token=${token}; Path=/; Partitioned`);
     response.status(201).send(request.cookies.token);
   } catch (error) {
     response.status(500).send("ett fel har inträffat vid inloggningen" + error);
