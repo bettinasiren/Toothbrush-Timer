@@ -21,7 +21,7 @@ function LoginForm() {
   async function handleSubmit(event: { preventDefault: () => void }) {
     event.preventDefault();
 
-    await fetch("http://localhost:3000/login/", {
+    await fetch("/login/", {
       method: "POST",
       body: JSON.stringify({
         email,

@@ -85,7 +85,7 @@ const UserContextProvider: React.FC<{ children: ReactNode }> = ({
 
   //hämtar info från den inloggade användaren
   async function fetchUserData() {
-    await fetch(`http://localhost:3000/user/${userId}`)
+    await fetch(`/user/${userId}`)
       .then((response) => response.json())
       .then((data) => {
         setUserName(data.username);
@@ -96,7 +96,7 @@ const UserContextProvider: React.FC<{ children: ReactNode }> = ({
   }
 
   async function fetchUserAvatar() {
-    await fetch(`http://localhost:3000/avatars/${userAvatarId}`)
+    await fetch(`/avatars/${userAvatarId}`)
       .then((response) => response.json())
       .then((data) => {
         setUserAvatarImg(data.avatar);

@@ -7,6 +7,12 @@ export default defineConfig({
    server: {
     proxy: {
       '/login': 'http://localhost:3000',
-    }
+      '/logout': 'http://localhost:3000',
+      '/user': 'http://localhost:3000',
+      '/avatars': 'http://localhost:3000',
+      '/token': 'http://localhost:3000',
+      '/brushing': 'http://localhost:3000',
+      '/brushing-sessions': 'http://localhost:3000',
+      }
   }
 })

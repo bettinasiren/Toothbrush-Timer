@@ -58,7 +58,7 @@ function ScoreboardComponent() {
   }, [earnedMedals]);
 
   async function fetchUserMedals() {
-    await fetch(`http://localhost:3000/brushing-sessions/${userId}`)
+    await fetch(`/brushing-sessions/${userId}`)
       .then((res) => res.json())
       .then((data) => {
         let earnedMedals = Math.floor(data.length / 5);

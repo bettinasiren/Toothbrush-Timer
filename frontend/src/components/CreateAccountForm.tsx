@@ -60,7 +60,7 @@ function CreateAccountForm() {
     console.log("Password", password);
     console.log("Avatar", selectedAvatar);
 
-    await fetch("http://localhost:3000/user/", {
+    await fetch("/user/", {
       method: "POST",
       body: JSON.stringify({
         username,
@@ -89,9 +89,6 @@ function CreateAccountForm() {
       {isCreated ? (
         <Container>
           <p> Du lyckades skapa ett konto!</p>
-          {/* <Button onClick={handleButtonClick}>
-            <i className="bi bi-arrow-return-left"></i>{" "}
-          </Button> */}
         </Container>
       ) : (
         <Container>
@@ -128,7 +125,7 @@ function CreateAccountForm() {
                 value={password}
                 onChange={(event) => setPassword(event.target.value)}
               />
-              <Form.Text style={{ color: '#ffffff' }}>
+              <Form.Text style={{ color: "#ffffff" }}>
                 Lösenordet måste vara minst 6 tecken långt
               </Form.Text>
             </Form.Group>
