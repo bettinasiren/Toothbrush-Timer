@@ -9,11 +9,11 @@ import confetti from "canvas-confetti";
 
 function BrushingTimer() {
   const { userId } = useAuth();
-  const [timerInMinutes, _setTimerInMinutes] = useState(0.1);
+  const [timerInMinutes, _setTimerInMinutes] = useState(2);
   const [isActive, setIsActive] = useState(false);
   const [timeLeft, setTimeLeft] = useState(0.1);
   const [progressDone, setProgressDone] = useState(false);
-  const [progress, setProgress] = useState(0); //börjar på 0 %
+  const [progress, setProgress] = useState(0);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
 
