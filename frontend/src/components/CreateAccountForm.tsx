@@ -15,19 +15,7 @@ const AvatarContainer = styled.div`
   transition: background-color 0.3s;
   text-align: center;
 `;
-// interface UserType {
-//   username: string;
-//   password: string;
-//   email: string;
-//   avatar_id: number;
-// }
-// interface AuthUserType {
-//   userId: number | null;
-//   isLoggedIn: boolean;
-//   setUserId: (id: number | null) => void;
-//   setIsLoggedIn : (isLoggedIn: boolean) => void;
 
-// }
 function CreateAccountForm() {
   const [username, setUserName] = useState("");
   const [email, setEmail] = useState("");
@@ -44,7 +32,7 @@ function CreateAccountForm() {
 
   function getAvatars() {
     fetch("/avatars")
-      .then((res) => res.json())
+      .then((response) => response.json())
       .then((data) => {
         console.log(data);
         setAvatars(data);
@@ -56,9 +44,6 @@ function CreateAccountForm() {
 
   async function handleSubmit(event: { preventDefault: () => void }) {
     event.preventDefault();
-    console.log("Email", email);
-    console.log("Password", password);
-    console.log("Avatar", selectedAvatar);
 
     await fetch("/user/", {
       method: "POST",

@@ -33,7 +33,6 @@ function LoginForm() {
       },
       credentials: "include",
     }).then((response) => {
-      console.log(response);
       if (response.ok) {
         setIsLoggedIn(true);
         navigate("/");
@@ -48,7 +47,6 @@ function LoginForm() {
   return (
     <Container>
       <LogoImg src={StarBrushLogo} alt="Logo" />
-      {/* <h2>Brush Wars</h2> */}
       <Form onSubmit={handleSubmit}>
         <Form.Group className="mb-3" controlId="formBasicEmail">
           <legend>

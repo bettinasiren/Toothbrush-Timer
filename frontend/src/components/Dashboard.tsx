@@ -21,13 +21,9 @@ function Home() {
       },
       credentials: "include",
     }).then((response) => {
-      console.log(response);
-      console.log(document.cookie);
-      console.log(userId);
       if (response.ok) {
         setIsLoggedIn(false);
         setUserId(null);
-        console.log("du har loggat ut");
         navigate("/");
       }
     });

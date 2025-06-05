@@ -24,10 +24,9 @@ function BrushingTimer() {
     let brushingTimer: string | number | NodeJS.Timeout | undefined;
     if (isActive && timeLeft > 0 && isPlaying) {
       brushingTimer = setTimeout(() => {
-        setTimeLeft((prevTime) => prevTime - 1); //kollar på tiden i procent och minskar med en.
+        setTimeLeft((prevTime) => prevTime - 1);
         setProgress((prev) => {
           const newProgress = prev + 100 / (timerInMinutes * 60);
-          console.log(newProgress);
           return newProgress < 0 ? 0 : newProgress;
         });
         setIsPlaying(true);
@@ -50,7 +49,6 @@ function BrushingTimer() {
   let minutes = Math.floor(timeLeft / 60);
   seconds = timeLeft - minutes * 60;
 
-  //fuktion som kollar om musiken spelar eller inte
   function togglePlay() {
     if (audioRef.current) {
       if (isPlaying) {
@@ -79,7 +77,7 @@ function BrushingTimer() {
         "Content-Type": "application/json",
       },
     })
-      .then((res) => res.json())
+      .then((response) => response.json())
       .then((data) => {
         console.log(data);
       });

@@ -35,7 +35,6 @@ function ScoreboardComponent() {
   const [earnedMedals, setEarnedMedals] = useState<number>(0);
   const [medals, setMedals] = useState<MedalType[]>([]);
   const [stars, setStars] = useState<MedalType[]>([]);
-
   const [diamonds, setDiamonds] = useState<MedalType[]>([]);
 
   useEffect(() => {
@@ -59,7 +58,7 @@ function ScoreboardComponent() {
 
   async function fetchUserMedals() {
     await fetch(`/brushing-sessions/${userId}`)
-      .then((res) => res.json())
+      .then((response) => response.json())
       .then((data) => {
         let earnedMedals = Math.floor(data.length / 5);
         setEarnedMedals(earnedMedals);
