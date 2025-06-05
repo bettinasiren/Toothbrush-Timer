@@ -36,8 +36,8 @@ const UserContextProvider: React.FC<{ children: ReactNode }> = ({
   // kollar på inloggat läge och sätter cookie
   useEffect(() => {
     const cookie = document.cookie
-      .split("; ") // gör en array av strängar
-      .find((row) => row.startsWith("tbtimer_token=")); //hitta min cookie på namnet
+      .split("; ")
+      .find((row) => row.startsWith("tbtimer_token="));
 
     if (cookie) {
       const token = cookie.split("=")[1];
@@ -56,7 +56,7 @@ const UserContextProvider: React.FC<{ children: ReactNode }> = ({
     if (userId) {
       fetchUserData();
     } else {
-      setUserAvatarId(null); //i denna tömmer jag allt om userId inte finns
+      setUserAvatarId(null);
       setUserAvatarImg("");
       setUserName("");
     }
@@ -72,10 +72,9 @@ const UserContextProvider: React.FC<{ children: ReactNode }> = ({
   // hämtar användarens id genom att titta på unik token.
   async function fetchUserId(token: string) {
     await fetch(`/token/${token}`)
-      .then((res) => {
-        alert("hej");
-        if (res.status !== 404) {
-          return res.json();
+      .then((response) => {
+        if (response.status !== 404) {
+          return response.json();
         }
       })
       .then((data) => {
