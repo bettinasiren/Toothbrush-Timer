@@ -6,8 +6,10 @@ import { Client } from "pg";
 import { v4 as uuidv4 } from "uuid";
 import cookieParser from "cookie-parser";
 
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 3002;
 const app = express();
+
+console.log("hej")
 
 dotenv.config();
 
@@ -105,8 +107,10 @@ app.get("/token/:token", async (request, response) => {
 
   if (!userId) {
     response.status(404).send("userId finns ej");
+    return
   }
 
+  console.log(userId[0])
   response.status(200).send(userId[0]);
 });
 

@@ -19,8 +19,9 @@ const dotenv_1 = __importDefault(require("dotenv"));
 const pg_1 = require("pg");
 const uuid_1 = require("uuid");
 const cookie_parser_1 = __importDefault(require("cookie-parser"));
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 3002;
 const app = (0, express_1.default)();
+console.log("hej");
 dotenv_1.default.config();
 const client = new pg_1.Client({
     connectionString: process.env.PGURI,
@@ -29,7 +30,7 @@ app.use(express_1.default.static(path_1.default.join(path_1.default.resolve(), "
 //har kvar denna för att kunna publicera på github-pages och egen server i framtiden
 app.use((0, cors_1.default)({
     // origin: "http://localhost:5173",
-    origin: "https://toothbrush-timer.onrender.com",
+    origin: ["https://toothbrush-timer.onrender.com", "http://localhost:5173"],
     credentials: true,
 }));
 app.use(express_1.default.json());
@@ -64,7 +65,9 @@ app.get("/token/:token", (request, response) => __awaiter(void 0, void 0, void 0
     const { rows: userId } = yield client.query("SELECT user_id FROM tokens WHERE token=$1", [token]);
     if (!userId) {
         response.status(404).send("userId finns ej");
+        return;
     }
+    console.log(userId[0]);
     response.status(200).send(userId[0]);
 }));
 //login

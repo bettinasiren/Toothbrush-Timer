@@ -71,8 +71,13 @@ const UserContextProvider: React.FC<{ children: ReactNode }> = ({
 
   // hämtar användarens id genom att titta på unik token.
   async function fetchUserId(token: string) {
-    await fetch(`http://localhost:3000/token/${token}`)
-      .then((res) => res.json())
+    await fetch(`/token/${token}`)
+      .then((res) => {
+        alert("hej");
+        if (res.status !== 404) {
+          return res.json();
+        }
+      })
       .then((data) => {
         if (data.user_id) {
           setUserId(data.user_id);

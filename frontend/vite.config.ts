@@ -6,13 +6,13 @@ export default defineConfig({
   plugins: [react()],
    server: {
     proxy: {
-      '/login': 'http://localhost:3000',
-      '/logout': 'http://localhost:3000',
-      '/user': 'http://localhost:3000',
-      '/avatars': 'http://localhost:3000',
-      '/token': 'http://localhost:3000',
-      '/brushing': 'http://localhost:3000',
-      '/brushing-sessions': 'http://localhost:3000',
+      '/login': 'http://localhost:3002',
+      '/logout': 'http://localhost:3002',
+      '/user': 'http://localhost:3002',
+      '/avatars': 'http://localhost:3002',
+      '/token': 'http://localhost:3002',
+      '/brushing': 'http://localhost:3002',
+      '/brushing-sessions': 'http://localhost:3002',
       }
   }
 })
