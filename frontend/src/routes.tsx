@@ -14,9 +14,7 @@ const routes = createBrowserRouter([
       { element: <CreateAccount />, path: "/create-account/" },
       {
         element: <PrivateRoutes />,
-        children: [
-          { element: <BrushingPage />, path: "/brushing-page" },
-        ],
+        children: [{ element: <BrushingPage />, path: "/brushing-page" }],
       },
     ],
   },

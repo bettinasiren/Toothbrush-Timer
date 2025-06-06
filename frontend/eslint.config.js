@@ -10,8 +10,7 @@ export default tseslint.config(
   {
     extends: [
       js.configs.recommended,
-      ...tseslint.configs.recommended,
-      eslintPluginPrettier],
+      ...tseslint.configs.recommended],
     files: ['**/*.{ts,tsx}'],
     languageOptions: {
       ecmaVersion: 2020,
@@ -27,6 +26,7 @@ export default tseslint.config(
       '@typescript-eslint/no-explicit-any': 'error',
       'quotes': ['error', 'double'],
       'semi': ['error', 'always'],
+      'prettier/prettier': 'error',
       ...reactHooks.configs.recommended.rules,
       'react-refresh/only-export-components': [
         'warn',

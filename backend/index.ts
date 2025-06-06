@@ -60,7 +60,7 @@ app.use(
     // origin: "http://localhost:5173",
     origin: ["https://toothbrush-timer.onrender.com", "http://localhost:5173"],
     credentials: true,
-  })
+  }),
 );
 app.use(express.json());
 app.use(cookieParser());
@@ -69,7 +69,7 @@ app.use(cookieParser());
 async function authenticate(
   request: MyRequest,
   response: Response,
-  next: NextFunction
+  next: NextFunction,
 ) {
   try {
     const token: string | undefined =
@@ -82,7 +82,7 @@ async function authenticate(
 
     const validToken = await client.query(
       "SELECT * FROM tokens WHERE token=$1",
-      [token]
+      [token],
     );
 
     if (validToken.rows.length === 0 || validToken.rows[0].token !== token) {
@@ -97,7 +97,7 @@ async function authenticate(
     if (error instanceof Error) {
       console.error(
         "An error has occurred during authentication.",
-        error.message
+        error.message,
       );
       response
         .status(500)
@@ -118,7 +118,7 @@ app.get("/token/:token", async (request, response) => {
 
     const { rows: userId }: { rows: UserIdResult[] } = await client.query(
       "SELECT user_id FROM tokens WHERE token=$1",
-      [token]
+      [token],
     );
 
     if (!userId) {
@@ -131,7 +131,7 @@ app.get("/token/:token", async (request, response) => {
     if (error instanceof Error) {
       console.error(
         "An error occurred while retrieving the token:",
-        error.message
+        error.message,
       );
       response
         .status(500)
@@ -147,12 +147,12 @@ app.get("/token/:token", async (request, response) => {
 
 //login
 app.post("/login", async (request: Request, response) => {
-  const { email, password } = <UserType> request.body;
+  const { email, password } = <UserType>request.body;
 
   try {
     const existingUser = await client.query<User>(
       "SELECT * FROM users WHERE email=$1 AND password=$2",
-      [email, password]
+      [email, password],
     );
 
     if (existingUser.rows.length === 0) {
@@ -168,7 +168,7 @@ app.post("/login", async (request: Request, response) => {
 
     response.setHeader(
       "Set-Cookie",
-      `tbtimer_token=${token}; Path=/; Partitioned`
+      `tbtimer_token=${token}; Path=/; Partitioned`,
     );
     response.status(201).send(request.cookies.token);
   } catch (error) {
@@ -209,7 +209,7 @@ app.post(
         response.status(500).send("An error has occurred during logout.");
       }
     }
-  }
+  },
 );
 
 //--------------------Användare---------------------
@@ -219,7 +219,7 @@ app.post("/user", async (request, response) => {
   try {
     const { rows: avatars }: { rows: AvatarType[] } = await client.query(
       "SELECT * FROM avatars WHERE id = $1",
-      [selectedAvatar]
+      [selectedAvatar],
     );
 
     if (avatars.length === 0) {
@@ -228,7 +228,7 @@ app.post("/user", async (request, response) => {
 
     const { rows: user }: { rows: User[] } = await client.query(
       "INSERT INTO users (username, password, email, avatar_id) VALUES ($1, $2, $3, $4) RETURNING *",
-      [username, password, email, selectedAvatar]
+      [username, password, email, selectedAvatar],
     );
 
     response.status(201).send(user[0]);
@@ -250,7 +250,7 @@ app.get("/user/:id", async (request, response) => {
     const id = request.params.id;
     const { rows: user }: { rows: User[] } = await client.query(
       "SELECT * FROM users WHERE id=$1",
-      [id]
+      [id],
     );
 
     if (user.length === 0) response.status(404).send("User not found");
@@ -260,7 +260,7 @@ app.get("/user/:id", async (request, response) => {
     if (error instanceof Error) {
       console.error(
         "An error occurred while retrieving the user:",
-        error.message
+        error.message,
       );
       response
         .status(500)
@@ -276,14 +276,14 @@ app.get("/user/:id", async (request, response) => {
 app.get("/avatars", async (_request, response) => {
   try {
     const { rows: avatar }: { rows: AvatarType[] } = await client.query(
-      "SELECT * FROM avatars"
+      "SELECT * FROM avatars",
     );
     response.send(avatar);
   } catch (error) {
     if (error instanceof Error) {
       console.error(
         "An error occurred while retrieving avatars:",
-        error.message
+        error.message,
       );
       response
         .status(500)
@@ -301,19 +301,19 @@ app.get("/avatars/:id", async (request, response) => {
     const avatarId = request.params.id;
     const { rows: avatar }: { rows: AvatarType[] } = await client.query(
       "SELECT avatar FROM avatars WHERE id=$1",
-      [avatarId]
+      [avatarId],
     );
     response.send(avatar[0]);
   } catch (error) {
     if (error instanceof Error) {
       console.error(
         "An error occurred while retrieving user avatar:",
-        error.message
+        error.message,
       );
       response
         .status(500)
         .send(
-          "An error occurred while retrieving user avatar: " + error.message
+          "An error occurred while retrieving user avatar: " + error.message,
         );
     } else {
       console.error("An unknown error occurred:", error);
@@ -330,7 +330,7 @@ app.post("/brushing/:id", async (request, response) => {
 
     const brushingSession = await client.query<BrushingSessionType>(
       "INSERT INTO brushing_tracker (user_id) VALUES ($1)",
-      [userId]
+      [userId],
     );
 
     if (brushingSession.rowCount === 0) {
@@ -347,13 +347,13 @@ app.post("/brushing/:id", async (request, response) => {
     if (error instanceof Error) {
       console.error(
         "An error occurred while processing the brushing session:",
-        error.message
+        error.message,
       );
       response
         .status(500)
         .send(
           "An error occurred while processing the brushing session: " +
-            error.message
+            error.message,
         );
     } else {
       console.error("An unknown error occurred:", error);
@@ -375,13 +375,13 @@ app.get("/brushing-sessions/:id", async (request, response) => {
     if (error instanceof Error) {
       console.error(
         "An error occurred while retrieving the brushing session:",
-        error.message
+        error.message,
       );
       response
         .status(500)
         .send(
           "An error occurred while retrieving the brushing session: " +
-            error.message
+            error.message,
         );
     } else {
       console.error("An unknown error occurred:", error);

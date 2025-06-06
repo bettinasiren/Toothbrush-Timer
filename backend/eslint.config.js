@@ -26,6 +26,7 @@ export default tseslint.config(
       '@typescript-eslint/no-explicit-any': 'off',
       'quotes': ['error', 'double'],
       'semi': ['error', 'always'],
+      'prettier/prettier': 'error',
     },
   },
 );
