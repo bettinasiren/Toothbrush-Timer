@@ -75,7 +75,6 @@ app.get("/token/:token", (request, response) => __awaiter(void 0, void 0, void 0
             response.status(404).send("userId not exists ");
             return;
         }
-        console.log(userId[0]);
         response.status(200).send(userId[0]);
     }
     catch (error) {
@@ -152,7 +151,6 @@ app.post("/logout", authenticate, (request, response) => __awaiter(void 0, void 
 // skapa användare
 app.post("/user", (request, response) => __awaiter(void 0, void 0, void 0, function* () {
     const { username, password, email, selectedAvatar } = request.body;
-    console.log(request.body);
     try {
         const { rows: avatars } = yield client.query("SELECT * FROM avatars WHERE id = $1", [selectedAvatar]);
         if (avatars.length === 0) {
@@ -287,6 +285,7 @@ app.get("/brushing-sessions/:id", (request, response) => __awaiter(void 0, void 
 const StartServer = () => __awaiter(void 0, void 0, void 0, function* () {
     yield client.connect();
     app.listen(port, () => {
+        /* eslint-disable-next-line no-console */
         console.log(`Redo på Port http://localhost:${port}/`);
     });
 });
