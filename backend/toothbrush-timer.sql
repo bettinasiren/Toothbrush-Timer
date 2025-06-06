@@ -55,26 +55,3 @@ ALTER TABLE users
 ADD COLUMN avatar_id INT;
 
 ALTER TABLE users ADD CONSTRAINT fk_avatar FOREIGN KEY (avatar_id) REFERENCES avatars (id)
--- INSERT INTO
---   medals (medal_name, medal_image, criteria)
--- VALUES
---   (
---     'first medal',
---     'https://img.icons8.com/arcade/64/prize.png',
---     'Brush teeth 5 times'
---   ),
---   (
---     'second medal',
---     'https://img.icons8.com/arcade/64/prize.png',
---     'Brush teeth 10 times'
---   ),
---   (
---     'third medal',
---     'https://img.icons8.com/arcade/64/prize.png',
---     'Brush teeth 15 times'
---   ),
---   (
---     'forth medal',
---     'https://img.icons8.com/arcade/64/prize.png',
---     'Brush teeth 20 times'
---   );

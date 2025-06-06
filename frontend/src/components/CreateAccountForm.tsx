@@ -34,7 +34,6 @@ function CreateAccountForm() {
     fetch("/avatars")
       .then((response) => response.json())
       .then((data) => {
-        console.log(data);
         setAvatars(data);
       });
   }

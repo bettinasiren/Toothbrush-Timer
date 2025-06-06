@@ -60,7 +60,7 @@ function ScoreboardComponent() {
     await fetch(`/brushing-sessions/${userId}`)
       .then((response) => response.json())
       .then((data) => {
-        let earnedMedals = Math.floor(data.length / 5);
+        const earnedMedals = Math.floor(data.length / 5);
         setEarnedMedals(earnedMedals);
       });
   }

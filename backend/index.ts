@@ -126,7 +126,6 @@ app.get("/token/:token", async (request, response) => {
       return;
     }
 
-    console.log(userId[0]);
     response.status(200).send(userId[0]);
   } catch (error) {
     if (error instanceof Error) {
@@ -147,8 +146,8 @@ app.get("/token/:token", async (request, response) => {
 });
 
 //login
-app.post("/login", async (request: Request<{}, {}, UserType>, response) => {
-  const { email, password } = request.body;
+app.post("/login", async (request: Request, response) => {
+  const { email, password } = <UserType> request.body;
 
   try {
     const existingUser = await client.query<User>(
@@ -217,7 +216,6 @@ app.post(
 // skapa användare
 app.post("/user", async (request, response) => {
   const { username, password, email, selectedAvatar }: UserType = request.body;
-  console.log(request.body);
   try {
     const { rows: avatars }: { rows: AvatarType[] } = await client.query(
       "SELECT * FROM avatars WHERE id = $1",
@@ -395,6 +393,7 @@ app.get("/brushing-sessions/:id", async (request, response) => {
 const StartServer = async () => {
   await client.connect();
   app.listen(port, () => {
+    /* eslint-disable-next-line no-console */
     console.log(`Redo på Port http://localhost:${port}/`);
   });
 };

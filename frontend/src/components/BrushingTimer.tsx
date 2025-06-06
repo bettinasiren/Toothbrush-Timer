@@ -9,7 +9,7 @@ import confetti from "canvas-confetti";
 
 function BrushingTimer() {
   const { userId } = useAuth();
-  const [timerInMinutes, _setTimerInMinutes] = useState(2);
+  const [timerInMinutes] = useState(2);
   const [isActive, setIsActive] = useState(false);
   const [timeLeft, setTimeLeft] = useState(0.1);
   const [progressDone, setProgressDone] = useState(false);
@@ -17,7 +17,7 @@ function BrushingTimer() {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
 
-  let timeInSeconds = timerInMinutes * 60;
+  const timeInSeconds = timerInMinutes * 60;
   let seconds = 0;
 
   useEffect(() => {
@@ -46,7 +46,7 @@ function BrushingTimer() {
     return () => clearTimeout(brushingTimer);
   }, [timeLeft, isActive, isPlaying]);
 
-  let minutes = Math.floor(timeLeft / 60);
+  const minutes = Math.floor(timeLeft / 60);
   seconds = timeLeft - minutes * 60;
 
   function togglePlay() {
@@ -76,11 +76,7 @@ function BrushingTimer() {
         Accept: "application/json",
         "Content-Type": "application/json",
       },
-    })
-      .then((response) => response.json())
-      .then((data) => {
-        console.log(data);
-      });
+    });
   }
 
   return (
