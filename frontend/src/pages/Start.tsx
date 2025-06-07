@@ -1,4 +1,4 @@
-import { useAuth } from "../context/UserContext";
+import { useAuth } from "../context/AuthUser";
 import { Container } from "react-bootstrap";
 import Dashboard from "../components/Dashboard";
 import LoginForm from "../components/LoginForm";

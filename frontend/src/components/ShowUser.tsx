@@ -1,5 +1,5 @@
 import { Container } from "react-bootstrap";
-import { useAuth } from "../context/UserContext";
+import { useAuth } from "../context/AuthUser";
 
 function ShowUser() {
   const { userName, userAvatarImg } = useAuth();

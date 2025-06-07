@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { useAuth } from "../context/UserContext";
+import { useAuth } from "../context/AuthUser";
 import { Container, Button, Form } from "react-bootstrap";
 import { StarBrushLogo } from "../assets/images";
 import styled from "styled-components";

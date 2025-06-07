@@ -1,6 +1,6 @@
-import { useAuth } from "../context/UserContext";
+import { useAuth } from "../context/AuthUser";
 import { diamondImage, medalImage, starImage } from "../assets/images";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import styled from "styled-components";
 import { Container } from "react-bootstrap";
 
@@ -56,20 +56,20 @@ function ScoreboardComponent() {
     setDiamonds(newDiamonds);
   }, [earnedMedals]);
 
-  async function fetchUserMedals() {
-    await fetch(`/brushing-sessions/${userId}`)
-      .then((response) => response.json())
-      .then((data) => {
-        const earnedMedals = Math.floor(data.length / 5);
-        setEarnedMedals(earnedMedals);
-      });
-  }
-
-  useEffect(() => {
+  const fetchUserMedals = useCallback(async () => {
     if (userId) {
-      fetchUserMedals();
+      await fetch(`/brushing-sessions/${userId}`)
+        .then((response) => response.json())
+        .then((data) => {
+          const earnedMedals = Math.floor(data.length / 5);
+          setEarnedMedals(earnedMedals);
+        });
     }
   }, [userId]);
+
+  useEffect(() => {
+    fetchUserMedals();
+  }, [fetchUserMedals]);
 
   if (isLoading) {
     return <div>Loading...</div>;

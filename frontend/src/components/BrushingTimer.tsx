@@ -1,6 +1,6 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Container, Button } from "react-bootstrap";
-import { useAuth } from "../context/UserContext";
+import { useAuth } from "../context/AuthUser";
 import { StarWarsMusic } from "../assets/music";
 import BrushingInfoText from "./BrushingInfoText";
 import DancingAvatar from "./DancingAvatar";
@@ -16,6 +16,16 @@ function BrushingTimer() {
   const [progress, setProgress] = useState(0);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
+
+  const handleBrushingSession = useCallback(async () => {
+    await fetch(`/brushing/${userId}`, {
+      method: "POST",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      },
+    });
+  }, [userId]);
 
   const timeInSeconds = timerInMinutes * 60;
   let seconds = 0;
@@ -44,7 +54,7 @@ function BrushingTimer() {
     }
 
     return () => clearTimeout(brushingTimer);
-  }, [timeLeft, isActive, isPlaying]);
+  }, [timeLeft, isActive, isPlaying, timerInMinutes, handleBrushingSession]);
 
   const minutes = Math.floor(timeLeft / 60);
   seconds = timeLeft - minutes * 60;
@@ -67,16 +77,6 @@ function BrushingTimer() {
     setTimeLeft(timeInSeconds);
     setProgressDone(false);
     togglePlay();
-  }
-
-  async function handleBrushingSession() {
-    await fetch(`/brushing/${userId}`, {
-      method: "POST",
-      headers: {
-        Accept: "application/json",
-        "Content-Type": "application/json",
-      },
-    });
   }
 
   return (

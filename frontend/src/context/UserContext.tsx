@@ -1,27 +1,6 @@
-import React, { useState, useContext, type ReactNode, useEffect } from "react";
+import React, { useState, type ReactNode, useEffect, useCallback } from "react";
 
-interface AuthUserType {
-  userId: number | null;
-  isLoggedIn: boolean;
-  setUserId: (id: number | null) => void;
-  setIsLoggedIn: (isLoggedIn: boolean) => void;
-  userName: string;
-  userAvatarId: number | null;
-  userAvatarImg: string;
-  isLoading: boolean;
-}
-
-const UserContext = React.createContext<AuthUserType | undefined>(undefined);
-
-export function useAuth(): AuthUserType {
-  const context = useContext(UserContext);
-
-  if (!context) {
-    throw new Error();
-  }
-
-  return context;
-}
+import { UserContext, type AuthUserType } from "./AuthUser";
 
 const UserContextProvider: React.FC<{ children: ReactNode }> = ({
   children,
@@ -51,10 +30,17 @@ const UserContextProvider: React.FC<{ children: ReactNode }> = ({
     }
   }, [isLoggedIn]);
 
-  //hämtar userData om userId är satt eller tömmer userData om userId är tom
-  useEffect(() => {
+  //hämtar info från den inloggade användaren
+  const fetchUserData = useCallback(async () => {
     if (userId) {
-      fetchUserData();
+      await fetch(`/user/${userId}`)
+        .then((response) => response.json())
+        .then((data) => {
+          setUserName(data.username);
+          if (data.avatar_id) {
+            setUserAvatarId(data.avatar_id);
+          }
+        });
     } else {
       setUserAvatarId(null);
       setUserAvatarImg("");
@@ -62,12 +48,9 @@ const UserContextProvider: React.FC<{ children: ReactNode }> = ({
     }
   }, [userId]);
 
-  //hämtar den avatar som användaren har
   useEffect(() => {
-    if (userAvatarId) {
-      fetchUserAvatar();
-    }
-  }, [userAvatarId]);
+    fetchUserData();
+  }, [fetchUserData]);
 
   // hämtar användarens id genom att titta på unik token.
   async function fetchUserId(token: string) {
@@ -87,25 +70,20 @@ const UserContextProvider: React.FC<{ children: ReactNode }> = ({
       });
   }
 
-  //hämtar info från den inloggade användaren
-  async function fetchUserData() {
-    await fetch(`/user/${userId}`)
-      .then((response) => response.json())
-      .then((data) => {
-        setUserName(data.username);
-        if (data.avatar_id) {
-          setUserAvatarId(data.avatar_id);
-        }
-      });
-  }
+  //hämtar den avatar som användaren har
+  const fetchUserAvatar = useCallback(async () => {
+    if (userAvatarId) {
+      await fetch(`/avatars/${userAvatarId}`)
+        .then((response) => response.json())
+        .then((data) => {
+          setUserAvatarImg(data.avatar);
+        });
+    }
+  }, [userAvatarId]);
 
-  async function fetchUserAvatar() {
-    await fetch(`/avatars/${userAvatarId}`)
-      .then((response) => response.json())
-      .then((data) => {
-        setUserAvatarImg(data.avatar);
-      });
-  }
+  useEffect(() => {
+    fetchUserAvatar();
+  }, [fetchUserAvatar]);
 
   const value: AuthUserType = {
     userId,

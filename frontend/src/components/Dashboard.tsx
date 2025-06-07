@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../context/UserContext";
+import { useAuth } from "../context/AuthUser";
 import { Container, Row, Button } from "react-bootstrap";
 import ScoreboardComponent from "./ScoreboardComponent";
 import ShowUser from "./ShowUser";

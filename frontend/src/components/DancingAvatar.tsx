@@ -1,5 +1,5 @@
 import styled, { keyframes } from "styled-components";
-import { useAuth } from "../context/UserContext";
+import { useAuth } from "../context/AuthUser";
 import { Container } from "react-bootstrap";
 
 const dance = keyframes`
