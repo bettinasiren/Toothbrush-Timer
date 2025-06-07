@@ -251,7 +251,7 @@ app.post("/brushing/:id", (request, response) => __awaiter(void 0, void 0, void 
             response
                 .status(500)
                 .send("An error occurred while processing the brushing session: " +
-                error.message);
+                    error.message);
         }
         else {
             console.error("An unknown error occurred:", error);
@@ -274,7 +274,7 @@ app.get("/brushing-sessions/:id", (request, response) => __awaiter(void 0, void 
             response
                 .status(500)
                 .send("An error occurred while retrieving the brushing session: " +
-                error.message);
+                    error.message);
         }
         else {
             console.error("An unknown error occurred:", error);
@@ -285,7 +285,6 @@ app.get("/brushing-sessions/:id", (request, response) => __awaiter(void 0, void 
 const StartServer = () => __awaiter(void 0, void 0, void 0, function* () {
     yield client.connect();
     app.listen(port, () => {
-        /* eslint-disable-next-line no-console */
         console.log(`Redo på Port http://localhost:${port}/`);
     });
 });
